@@ -10,11 +10,22 @@ import AVFoundation
 ///Class for audio file with duration
 class AudioFile: AVAudioFile{
     
+    ///Returns a frame count of an audio file
+    private var frameCount: AVAudioFrameCount{
+        get{
+            return AVAudioFrameCount(self.length)
+        }
+    }
+    
+    ///Creates a pcm buffer
+    lazy var buffer: AVAudioPCMBuffer? = {
+        return AVAudioPCMBuffer(pcmFormat: self.processingFormat, frameCapacity: frameCount)
+    }()
+    
     ///Returns the duration of the file in seconds
     var duration: Double{
         get{
-            let audioNodeFileLength = AVAudioFrameCount(self.length)
-            return Double(Double(audioNodeFileLength) / self.processingFormat.sampleRate)
+            return Double(Double(frameCount) / self.processingFormat.sampleRate)
         }
     }
     

@@ -36,9 +36,18 @@ class Recorder{
     private let settings = [AVFormatIDKey: Int(kAudioFormatLinearPCM), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
     
     
-    var audioRecorder: AVAudioRecorder!
-    var name: String?
-    var fileName: String?
+    private var audioRecorder: AVAudioRecorder!
+    private var name: String?
+    private var fileName: String?
+    
+    var isRecording: Bool{
+        get{
+            guard let recorder = audioRecorder else{
+                return false
+            }
+            return recorder.isRecording
+        }
+    }
     
     ///Delegate for recorder
     var delegate: RecorderDelegate?
@@ -63,7 +72,7 @@ class Recorder{
     func validateAndStart(name: String){
        
         self.name = name
-        self.fileName = name + ".m4a"
+        self.fileName = UUID().uuidString + ".m4a"
         
         canRecordFiles { (canRecord) in
             do{
@@ -87,6 +96,7 @@ class Recorder{
         
         do{
             try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default)
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
             try AVAudioSession.sharedInstance().setActive(true)
         }
         catch{
@@ -98,6 +108,8 @@ class Recorder{
             }
             
             self.audioRecorder = try AVAudioRecorder(url: recordURL, settings: self.settings)
+            self.audioRecorder.isMeteringEnabled = true
+            
             self.audioRecorder.prepareToRecord()
             self.audioRecorder.record()
             
@@ -111,16 +123,19 @@ class Recorder{
     
     
     ///Method that stops the recording
-    func stopRecording(){
-        self.audioRecorder.stop()
+    func stopRecording() -> VoiceSound{
         
-        do{
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-        }
-        catch{
-            
-        }
+        self.audioRecorder.stop()
+        self.delegate?.didStopRecording()
+        
+        let newVoiceSound = VoiceSound(path: self.audioRecorder.url.path, name: self.name ?? "")
+        
+        self.name = nil
+        self.fileName = nil
+        
+        Player.shared.setPlayback()
+        
+        return newVoiceSound
     }
     
     ///Enum for errors with starting recording
