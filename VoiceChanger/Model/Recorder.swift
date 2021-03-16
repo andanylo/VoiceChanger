@@ -32,14 +32,16 @@ class Recorder{
     }
     
     
+    
     ///Standard settings for recording giles
     private let settings = [AVFormatIDKey: Int(kAudioFormatLinearPCM), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
     
-    
     private var audioRecorder: AVAudioRecorder!
-    private var name: String?
-    private var fileName: String?
     
+    ///Record timer to count how many seconds/minutes/miliseconds has been recorder
+    var recordTimer: CustomTimer = CustomTimer(timeInterval: 0.001)
+    
+    ///State of recorder
     var isRecording: Bool{
         get{
             guard let recorder = audioRecorder else{
@@ -52,16 +54,6 @@ class Recorder{
     ///Delegate for recorder
     var delegate: RecorderDelegate?
     
-    ///Returns the record URL, based on file name
-    private var recordURL: URL?{
-        get{
-            guard let recordsDirectory = DirectoryManager.shared.returnRecordsDirectory(), let fileName = self.fileName else{
-                return nil
-            }
-            return recordsDirectory.appendingPathComponent(fileName)
-        }
-    }
-    
     
     init() {
         self.audioRecorder = AVAudioRecorder()
@@ -69,27 +61,24 @@ class Recorder{
     
     
     ///Function that validates and starts the recording
-    func validateAndStart(name: String){
+    func validateAndStart(voiceSound: VoiceSound, errorHandler: @escaping (Error?) -> Void){
        
-        self.name = name
-        self.fileName = UUID().uuidString + ".m4a"
-        
         canRecordFiles { (canRecord) in
             do{
-                try self.startRecording(name: name, canRecord: canRecord)
+                try self.startRecording(voiceSound: voiceSound, canRecord: canRecord)
             }
             catch let error as RecordingError{
-                print(error.errorDescription ?? "")
+                errorHandler(error)
             }
             catch{
-                print(error.localizedDescription)
+                errorHandler(error)
             }
         }
         
     }
     
     ///Function that starts the recording
-    private func startRecording(name: String, canRecord: Bool) throws{
+    private func startRecording(voiceSound: VoiceSound, canRecord: Bool) throws{
         if !canRecord{
             throw RecordingError.cantRecordFiles
         }
@@ -103,7 +92,8 @@ class Recorder{
             throw RecordingError.unexpexted(error)
         }
         do{
-            guard let recordURL = self.recordURL else{
+
+            guard let recordURL = voiceSound.url else{
                 throw RecordingError.unknownURL
             }
             
@@ -112,6 +102,9 @@ class Recorder{
             
             self.audioRecorder.prepareToRecord()
             self.audioRecorder.record()
+            
+            self.recordTimer.reset()
+            self.recordTimer.start()
             
             self.delegate?.didStartRecording()
         }
@@ -123,19 +116,20 @@ class Recorder{
     
     
     ///Method that stops the recording
-    func stopRecording() -> VoiceSound{
+    func stopRecording(){
         
         self.audioRecorder.stop()
         self.delegate?.didStopRecording()
         
-        let newVoiceSound = VoiceSound(path: self.audioRecorder.url.path, name: self.name ?? "")
-        
-        self.name = nil
-        self.fileName = nil
+        self.recordTimer.pause()
         
         Player.shared.setPlayback()
-        
-        return newVoiceSound
+    }
+    
+    ///Returns current average power
+    func averagePower() -> Float{
+        self.audioRecorder.updateMeters()
+        return self.audioRecorder.averagePower(forChannel: 0)
     }
     
     ///Enum for errors with starting recording

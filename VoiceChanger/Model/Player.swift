@@ -32,7 +32,7 @@ class Player{
         
     }
     
-    private var audioNodes: AudioNodes!
+    var audioNodes: AudioNodes!
     
     var delegate: PlayerDelegate?
     
@@ -59,6 +59,7 @@ class Player{
     ///Play an audio file from
     func playFile(url: URL, effects: Effects?) throws{
         do{
+            Player.shared.setPlayback()
             
             let audioFile = try AudioFile(forReading: url)
             
@@ -83,7 +84,6 @@ class Player{
             }
             
             self.audioNodes.audioPlayer.scheduleBuffer(buffer) {
-                print("didStop")
                 self.delegate?.didPlayerStopPlaying()
             }
             self.audioNodes.audioPlayer.play()

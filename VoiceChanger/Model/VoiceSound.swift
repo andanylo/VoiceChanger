@@ -11,6 +11,16 @@ import CoreData
 class VoiceSound{
     
     var path: String = ""
+    
+    ///Set path from lastPathComponent
+    private func setPathLastPathComponent(lastPathComponent: String){
+        guard let recordsDirectory = DirectoryManager.shared.returnRecordsDirectory() else{
+            return
+        }
+        self.path = recordsDirectory.appendingPathComponent(lastPathComponent).path
+    }
+    
+    
     var name: String = ""
     
     ///Returns the url from a file path
@@ -20,8 +30,28 @@ class VoiceSound{
         }
     }
     
+    ///Returns the boolean if file exists
+    var fileExists: Bool{
+        get{
+            if path.isEmpty{
+                return false
+            }
+            return FileManager.default.fileExists(atPath: path)
+        }
+    }
+    
+    
+    
     ///Effects for the sound
     var effects: Effects = Effects()
+    
+    init(){
+        self.setPathLastPathComponent(lastPathComponent: UUID().uuidString + ".m4a")
+    }
+    
+    init(lastPathComponent: String){
+        self.setPathLastPathComponent(lastPathComponent: lastPathComponent)
+    }
     
     init(path: String, name: String){
         self.path = path

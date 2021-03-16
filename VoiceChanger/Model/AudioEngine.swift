@@ -11,10 +11,19 @@ import AVFoundation
 ///Class that extends the audioEngine
 class AudioEngine: AVAudioEngine{
     
+    private var format: AVAudioFormat?
+    
     ///Connect and attach nodes to audio engine
     func attachAndConnect(_ nodes: [AVAudioNode], format: AVAudioFormat) {
         let attached = nodes.contains(where: {$0.engine == nil})
-        if attached{
+        var differentFormat = false
+        if format != self.format{
+            if !attached{
+                nodes.forEach({self.detach($0)})
+            }
+            differentFormat = true
+        }
+        if attached || differentFormat{
             for i in nodes{
                 if i.engine == nil{
                     self.attach(i)
@@ -28,6 +37,9 @@ class AudioEngine: AVAudioEngine{
             }
             self.connect(nodes.last!, to: self.mainMixerNode, format: format)
         }
+        
+        self.format = format
+        
     }
     
     
