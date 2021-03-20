@@ -8,42 +8,80 @@
 import UIKit
 
 class ListViewController: UIViewController {
-
+    ///Table view
+    private lazy var collectionView: UICollectionView = {
+        let collectionViewLayout = UICollectionViewFlowLayout()
+        
+        
+        let view = UICollectionView(frame: CGRect.zero, collectionViewLayout: collectionViewLayout)
+        view.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
+        view.register(VoiceSoundCell.self, forCellWithReuseIdentifier: "VoiceSoundCell")
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.dataSource = self
+        view.delegate = self
+        view.allowsMultipleSelection = false
+        view.allowsSelectionDuringEditing = false
+        view.backgroundColor = UIColor.lightGray
+        view.contentInset = UIEdgeInsets.init(top: 10, left: 10, bottom: 10, right: 10)
+        view.backgroundColor = UIColor(red: 242 / 255, green: 242 / 255, blue: 247 / 255, alpha: 1)
+        
+        return view
+    }()
     
-    private lazy var tableView: UITableView = {
-//        let view = UITableView()
-//        view.register(, forCellReuseIdentifier: )
-//        view.translatesAutoresizingMaskIntoConstraints = false
-//        view.dataSource = self
-//        view.delegate = self
-//        view.allowsMultipleSelection = false
-//        view.allowsSelectionDuringEditing = false
-
-        return UITableView()
+    ///Navigation bar
+    private lazy var navigationBar: UINavigationBar = {
+        let navBar = UINavigationBar(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 44))
+        navBar.translatesAutoresizingMaskIntoConstraints = false
+        navBar.barStyle = .default
+        navBar.isTranslucent = false
+        navBar.sizeToFit()
+        navBar.heightAnchor.constraint(equalToConstant: navBar.frame.height).isActive = true
+        let navItem = UINavigationItem(title: "Title")
+        navBar.setItems([navItem], animated: false)
+        return navBar
     }()
-    private lazy var presentButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Present", for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.sizeToFit()
-        button.widthAnchor.constraint(equalToConstant: button.frame.width).isActive = true
-        button.heightAnchor.constraint(equalToConstant: button.frame.height).isActive = true
-        button.addTarget(self, action: #selector(presentRecorder), for: .touchUpInside)
-        button.setTitleColor(.black, for: .normal)
-        return button
-    }()
+    
+    var voiceSoundCellModels: [VoiceSoundCellModel] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.addSubview(presentButton)
+        let firstVoiceTest = VoiceSound(lastPathComponent: "test1.m4a")
+        firstVoiceTest.name = "TESTING1"
+        let secondVoiceTest = VoiceSound(lastPathComponent: "test2.m4a")
+        secondVoiceTest.name = "TESTING2"
+        Variables.shared.recordList.list = [firstVoiceTest, secondVoiceTest]
         
-        presentButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        presentButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+        voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0)})
         
+        self.view.addSubview(navigationBar)
+
+        navigationBar.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        navigationBar.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        navigationBar.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        
+        self.view.addSubview(collectionView)
+        
+        collectionView.topAnchor.constraint(equalTo: navigationBar.bottomAnchor, constant: 0.5).isActive = true
+        collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+       
         self.view.backgroundColor = .white
         
         
     }
+    
+    override func viewDidLayoutSubviews() {
+        guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
+            return
+        }
+        collectionViewFlowLayout.invalidateLayout()
+        collectionViewFlowLayout.itemSize = CGSize(width: self.view.frame.width - 20, height: 70)
+        collectionViewFlowLayout.minimumLineSpacing = 10
+        collectionView.layoutIfNeeded()
+    }
+    
     @objc func presentRecorder(){
         let recordViewController = RecordViewController()
         recordViewController.modalPresentationStyle = .overCurrentContext
@@ -52,6 +90,36 @@ class ListViewController: UIViewController {
         self.present(recordViewController, animated: true, completion: nil)
     }
 }
+
+///Collection view delegate and datasource
+extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return Variables.shared.recordList.list.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "VoiceSoundCell", for: indexPath) as? VoiceSoundCell else{
+            return UICollectionViewCell()
+        }
+        cell.start(with: voiceSoundCellModels[indexPath.row])
+        
+        return cell
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
+            return
+        }
+        let isSelected = voiceSoundCellModels[indexPath.row].isSelected
+        voiceSoundCellModels[indexPath.row].isSelected = isSelected == false ? true : false
+        collectionViewFlowLayout.invalidateLayout()
+        
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: self.view.frame.width - voiceSoundCellModels[indexPath.row].edges.left - voiceSoundCellModels[indexPath.row].edges.right, height: voiceSoundCellModels[indexPath.row].height)
+    }
+
+}
+
 
 extension ListViewController: UIViewControllerTransitioningDelegate{
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {

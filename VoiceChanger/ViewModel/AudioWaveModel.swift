@@ -19,6 +19,11 @@ class AudioWaveModel{
     init(numberOfTiles: Int, refreshInterval: TimeInterval){
         self.numberOfTiles = numberOfTiles
         self.refreshInterval = refreshInterval
+        reset()
+    }
+    
+    ///Resets the height array
+    func reset(){
         heightArray = [CGFloat].init(repeating: 5, count: numberOfTiles)
     }
     

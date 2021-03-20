@@ -11,6 +11,7 @@ import UIKit
 class RecordViewController: UIViewController, KeyboardDelegate{
     var extendedByKeyboard: Bool = false
     
+    ///Action, or animation when keyboard changes it's state
     func willChangeState(keyboardHeight: CGFloat, keyboardAnimationDuration: Double, state: KeyboardManager.State) {
         let nameFieldMaxY = self.recorderBackground.convert(CGPoint(x: 0, y: self.recorderBackground.nameField.frame.maxY), to: self.view).y
         let keyboardMinY = UIScreen.main.bounds.height - keyboardHeight
@@ -28,6 +29,7 @@ class RecordViewController: UIViewController, KeyboardDelegate{
     
     var recorder = Recorder()
     var voiceSound: VoiceSound!
+    var delegate: RecordViewControllerDelegate?
     
     ///Returns the recorder  view with audio wave and record button
     lazy var recorderBackground: RecorderView = {
@@ -64,6 +66,20 @@ class RecordViewController: UIViewController, KeyboardDelegate{
         recorder.recordTimer.delegate = self
     }
     
+    ///View will disappear
+    override func viewWillDisappear(_ animated: Bool) {
+        if voiceSound.fileExists{
+            delegate?.willSave(voiceSound: self.voiceSound)
+        }
+        if recorder.isRecording{
+            let fileExists = voiceSound.fileExists
+            recorder.stopRecording()
+            if !fileExists {
+                try? voiceSound.removeSound()
+            }
+        }
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else{
             return
@@ -81,10 +97,14 @@ extension RecordViewController: RecorderDelegate{
     }
     
     func didStopRecording() {
-        
-
+        DispatchQueue.main.async{
+            self.recorderBackground.audioWave.reset()
+            self.recorderBackground.timerLabel.reset()
+        }
     }
 }
+
+///Delegate of recorder
 extension RecordViewController: RecorderViewDelegate{
     func didClickRecordButton() {
         if !recorder.isRecording{
@@ -97,6 +117,7 @@ extension RecordViewController: RecorderViewDelegate{
         }
     }
 }
+
 ///Delegate of a custom timer
 extension RecordViewController: CustomTimerDelegate{
     func timerBlock(timer: CustomTimer) {
@@ -105,6 +126,8 @@ extension RecordViewController: CustomTimerDelegate{
             self.recorderBackground.audioWave.update(timer: timer, recorder: self.recorder)
         }
     }
-    
-    
+}
+
+protocol RecordViewControllerDelegate{
+    func willSave(voiceSound: VoiceSound)
 }

@@ -43,33 +43,20 @@ class Player{
         self.audioNodes = AudioNodes(audioEngine: AudioEngine(), audioPlayer: AudioPlayerNode(), pitchAndSpeedNode: AVAudioUnitTimePitch(), distortionNode: AVAudioUnitDistortion(), reverbNode: AVAudioUnitReverb())
     }
     
-    ///Play an audio file from path
-    func playFile(filePath: String, effects: Effects?) throws{
-        let url = URL(fileURLWithPath: filePath)
-        do{
-            try playFile(url: url, effects: effects)
-        }
-        catch{
-            throw error
-        }
-    }
     
     
-    
-    ///Play an audio file from
-    func playFile(url: URL, effects: Effects?) throws{
+    ///Play an audio file from voice sound class
+    func playFile(voiceSound: VoiceSound) throws{
         do{
             Player.shared.setPlayback()
             
-            let audioFile = try AudioFile(forReading: url)
-            
-            guard let buffer = audioFile.buffer else{
+            guard let buffer = voiceSound.audioFile?.buffer else{
                 throw PlayingError.cantScheduleBuffer
             }
-            try audioFile.read(into: buffer)
+            try voiceSound.audioFile?.read(into: buffer)
             
-            self.audioNodes.audioPlayer.file = audioFile
-            self.audioNodes.setEffects(effects: effects)
+            self.audioNodes.audioPlayer.file = voiceSound.audioFile
+            self.audioNodes.setEffects(effects: voiceSound.effects)
             
             self.audioNodes.audioEngine.attachAndConnect([
                 self.audioNodes.audioPlayer,

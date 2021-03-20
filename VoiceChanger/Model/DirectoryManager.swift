@@ -46,6 +46,7 @@ class DirectoryManager{
         }
     }
     
+    ///Returns the records directory, and creates it if it doesn't exist
     func returnRecordsDirectory() -> URL?{
         if !recordsDirectoryExists{
             createRecordsDirectory()

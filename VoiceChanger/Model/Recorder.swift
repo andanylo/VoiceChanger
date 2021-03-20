@@ -55,6 +55,10 @@ class Recorder{
     var delegate: RecorderDelegate?
     
     
+    ///Voice sound to record
+    private var voiceSoundToRecord: VoiceSound?
+    
+    
     init() {
         self.audioRecorder = AVAudioRecorder()
     }
@@ -103,6 +107,8 @@ class Recorder{
             self.audioRecorder.prepareToRecord()
             self.audioRecorder.record()
             
+            voiceSoundToRecord = voiceSound
+            
             self.recordTimer.reset()
             self.recordTimer.start()
             
@@ -120,6 +126,9 @@ class Recorder{
         
         self.audioRecorder.stop()
         self.delegate?.didStopRecording()
+        
+        self.voiceSoundToRecord?.updateAudioFile()
+        self.voiceSoundToRecord = nil
         
         self.recordTimer.pause()
         

@@ -14,7 +14,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        do{
+            Variables.shared.recordList.list = try CoreData.shared.fetch()
+        }
+        catch{
+            
+        }
         return true
     }
 

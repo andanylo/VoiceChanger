@@ -23,9 +23,14 @@ class TimerLabel: UILabel{
         self.heightAnchor.constraint(equalToConstant: self.frame.height).isActive = true
     }
     
+    ///Method that updates the text from timer
     func updateText(from timer: CustomTimer?){
-        
         self.text = self.timerLabelModel.returnText(from: timer)
+    }
+    
+    ///Resets the timer label
+    func reset(){
+        self.updateText(from: nil)
     }
     
     required init?(coder: NSCoder) {

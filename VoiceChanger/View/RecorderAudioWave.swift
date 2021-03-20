@@ -95,6 +95,16 @@ class RecorderAudioWave: UIView{
         
     }
     
+    ///Reset the audio wave
+    func reset(){
+        self.tiles.forEach({$0.removeFromSuperlayer()})
+        self.tiles.removeAll()
+        self.audioWaveModel.reset()
+        self.createTiles()
+        self.layoutTiles()
+    }
+    
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         layoutTiles()
