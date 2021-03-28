@@ -37,8 +37,8 @@ class VoiceChangerTests: XCTestCase {
         }))
     }
     func testEffects(){
-        let effect1 = Effects(speed: 1, pitch: 1, distortion: 1, reverb: 1)
-        let effect2 = Effects(speed: 1, pitch: 1, distortion: 1, reverb: 1)
+        let effect1 = Effects(speed: 1, pitch: 2, distortion: 3, reverb: 4)
+        let effect2 = Effects(speed: 1, pitch: 2, distortion: 3, reverb: 4)
         XCTAssertTrue(effect1.isEqual(effect2))
     }
     func testTimerLabelModel(){
@@ -49,14 +49,17 @@ class VoiceChangerTests: XCTestCase {
     }
     func testCustomTimer(){
         let timer = CustomTimer(timeInterval: 0.001)
-        timer.setCurrentTime(from: TimeComponents(seconds: 30, minutes: 1, miliseconds: 324))
-        XCTAssertEqual(timer.currTime, 90324)
+        timer.currTime = 1245678
+        
+        XCTAssertTrue(timer.timeComponents.minutes < 60 && timer.timeComponents.seconds < 60 && timer.timeComponents.miliseconds < 1000)
     }
+    
+    
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         self.measure {
-            // Put the code you want to measure the time of here.
+          
         }
     }
 

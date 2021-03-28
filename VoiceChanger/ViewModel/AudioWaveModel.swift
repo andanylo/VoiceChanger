@@ -29,7 +29,8 @@ class AudioWaveModel{
     
     ///Converts the power of audio record to the height of tile
     func convertPowerToHeightTile(viewHeight: CGFloat, power: Float) -> CGFloat{
-        let maximum: Float = 120
+        
+        let maximum: Float = 80
         let positivePower: Float = maximum + power
         let percentage = positivePower / maximum
         

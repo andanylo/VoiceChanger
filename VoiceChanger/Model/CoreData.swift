@@ -35,14 +35,14 @@ class CoreData{
         guard let voiceEntityDescription = NSEntityDescription.entity(forEntityName: "VoiceSoundEntity", in: context) else{
             throw CoreDataError.unexpeted
         }
-        guard let effectsEntityDescription = NSEntityDescription.entity(forEntityName: "Effects", in: context) else{
+        guard let effectsEntityDescription = NSEntityDescription.entity(forEntityName: "EffectsEntity", in: context) else{
             throw CoreDataError.unexpeted
         }
         
         ///Append or change entities in the context
         for sound in sounds{
             var newEntity: VoiceSoundEntity!
-            if let entity = self.entities.first(where: {$0.path == sound.path}){
+            if let entity = self.entities.first(where: {$0.lastPathComponent == sound.pathComponent}){
                 newEntity = entity
             }
             else{
@@ -68,7 +68,7 @@ class CoreData{
         
         ///Remove entities if needed
         for entity in self.entities{
-            if !sounds.contains(where: {$0.path == entity.path}){
+            if !sounds.contains(where: {$0.pathComponent == entity.lastPathComponent}){
                 context.delete(entity)
             }
         }
@@ -90,7 +90,8 @@ class CoreData{
            
             var voiceSounds: [VoiceSound] = []
             for entity in self.entities{
-                voiceSounds.append(VoiceSound(entity: entity))
+                let voiceSound = VoiceSound(entity: entity)
+                voiceSounds.append(voiceSound)
             }
             return voiceSounds
         }

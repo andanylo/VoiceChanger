@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="19H114" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="20D91" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="EffectsEntity" representedClassName="EffectsEntity" syncable="YES" codeGenerationType="class">
         <attribute name="distortion" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="pitch" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -7,12 +7,12 @@
         <attribute name="speed" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
     </entity>
     <entity name="VoiceSoundEntity" representedClassName="VoiceSoundEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="lastPathComponent" attributeType="String"/>
         <attribute name="name" optional="YES" attributeType="String"/>
-        <attribute name="path" attributeType="String"/>
         <relationship name="effects" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EffectsEntity"/>
     </entity>
     <elements>
         <element name="EffectsEntity" positionX="-54" positionY="0" width="128" height="103"/>
-        <element name="VoiceSoundEntity" positionX="-63" positionY="-18" width="128" height="88"/>
+        <element name="VoiceSoundEntity" positionX="-63" positionY="-18" width="128" height="74"/>
     </elements>
 </model>

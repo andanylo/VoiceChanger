@@ -10,33 +10,35 @@ import CoreData
 
 class VoiceSound{
     
-    var path: String = ""
+    var pathComponent: String = ""
     
-    ///Set path from lastPathComponent
-    private func setPathLastPathComponent(lastPathComponent: String){
-        guard let recordsDirectory = DirectoryManager.shared.returnRecordsDirectory() else{
-            return
+    ///Returns the url from a path component
+    var url: URL?{
+        get{
+            guard let recordsDirectory = DirectoryManager.shared.returnRecordsDirectory() else{
+                return nil
+            }
+            return recordsDirectory.appendingPathComponent(pathComponent)
         }
-        self.path = recordsDirectory.appendingPathComponent(lastPathComponent).path
+    }
+    
+    ///Returns the full path
+    var fullPath: String{
+        get{
+            return self.url?.path ?? ""
+        }
     }
     
     
     var name: String = ""
     
-    ///Returns the url from a file path
-    var url: URL?{
-        get{
-            return URL(fileURLWithPath: path)
-        }
-    }
-    
     ///Returns the boolean if file exists
     var fileExists: Bool{
         get{
-            if path.isEmpty{
+            if fullPath.isEmpty{
                 return false
             }
-            return FileManager.default.fileExists(atPath: path)
+            return FileManager.default.fileExists(atPath: fullPath)
         }
     }
     
@@ -44,9 +46,21 @@ class VoiceSound{
     var audioFile: AudioFile?
     
     ///Returns the duration of recording in seconds
-    var duration: Double{
+    private var _duration: Double{
         get{
             return audioFile == nil ? 0.0 : audioFile!.duration
+        }
+    }
+    
+    ///Returns the duration of voice sound in time components
+    var duration: TimeComponents{
+        get{
+            let secondsDuration = self._duration
+            var timeComponents = TimeComponents()
+            timeComponents.minutes = Int(secondsDuration / 60)
+            timeComponents.seconds = Int(secondsDuration) - timeComponents.minutes * 60
+            timeComponents.miliseconds = Int((secondsDuration - Double(Int(secondsDuration))) * 10)
+            return timeComponents
         }
     }
     
@@ -55,20 +69,20 @@ class VoiceSound{
     var effects: Effects = Effects()
     
     init(){
-        self.setPathLastPathComponent(lastPathComponent: UUID().uuidString + ".m4a")
+        self.pathComponent = UUID().uuidString + ".m4a"
     }
     
     init(lastPathComponent: String){
-        self.setPathLastPathComponent(lastPathComponent: lastPathComponent)
+        self.pathComponent = lastPathComponent
     }
     
-    init(path: String, name: String){
-        self.path = path
+    init(lastPathComponent: String, name: String){
+        self.pathComponent = lastPathComponent
         self.name = name
     }
     
     init(entity: VoiceSoundEntity){
-        self.path = entity.path ?? ""
+        self.pathComponent = entity.lastPathComponent ?? ""
         self.name = entity.name ?? ""
         self.effects = Effects(entity: entity.effects!)
         self.updateAudioFile()
@@ -110,7 +124,7 @@ extension VoiceSoundEntity: Entity{
         guard let voiceSound = object as? VoiceSound else{
             return self
         }
-        self.path = voiceSound.path
+        self.lastPathComponent = voiceSound.pathComponent
         self.name = voiceSound.name
         return self
     }

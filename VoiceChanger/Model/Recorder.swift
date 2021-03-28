@@ -56,7 +56,7 @@ class Recorder{
     
     
     ///Voice sound to record
-    private var voiceSoundToRecord: VoiceSound?
+    private weak var voiceSoundToRecord: VoiceSound?
     
     
     init() {
@@ -67,9 +67,9 @@ class Recorder{
     ///Function that validates and starts the recording
     func validateAndStart(voiceSound: VoiceSound, errorHandler: @escaping (Error?) -> Void){
        
-        canRecordFiles { (canRecord) in
+        canRecordFiles { [weak self] (canRecord) in
             do{
-                try self.startRecording(voiceSound: voiceSound, canRecord: canRecord)
+                try self?.startRecording(voiceSound: voiceSound, canRecord: canRecord)
             }
             catch let error as RecordingError{
                 errorHandler(error)
@@ -100,18 +100,19 @@ class Recorder{
             guard let recordURL = voiceSound.url else{
                 throw RecordingError.unknownURL
             }
-            
+
             self.audioRecorder = try AVAudioRecorder(url: recordURL, settings: self.settings)
-            self.audioRecorder.isMeteringEnabled = true
             
             self.audioRecorder.prepareToRecord()
             self.audioRecorder.record()
+
+            self.audioRecorder.isMeteringEnabled = true
             
             voiceSoundToRecord = voiceSound
-            
+
             self.recordTimer.reset()
             self.recordTimer.start()
-            
+
             self.delegate?.didStartRecording()
         }
         catch{

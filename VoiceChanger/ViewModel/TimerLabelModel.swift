@@ -31,9 +31,6 @@ class TimerLabelModel{
         return text
     }
     
-    func returnText(from timer: CustomTimer?) -> String{
-        return returnText(from: timer?.timeComponents ?? TimeComponents())
-    }
     
     private func returnStringFromComponent(component: Int) -> String{
         return component < 10 ? "0\(component)" : "\(component)"

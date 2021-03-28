@@ -24,8 +24,8 @@ class TimerLabel: UILabel{
     }
     
     ///Method that updates the text from timer
-    func updateText(from timer: CustomTimer?){
-        self.text = self.timerLabelModel.returnText(from: timer)
+    func updateText(from timeComponents: TimeComponents?){
+        self.text = self.timerLabelModel.returnText(from: timeComponents ?? TimeComponents())
     }
     
     ///Resets the timer label

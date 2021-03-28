@@ -12,7 +12,7 @@ import AVFoundation
 class Player{
     static var shared = Player()
     
-    ///Structure that has all audio nodes
+    ///Class that has all audio nodes
     struct AudioNodes{
         var audioEngine: AudioEngine
         var audioPlayer: AudioPlayerNode
@@ -32,11 +32,25 @@ class Player{
         
     }
     
+    ///Structure with voice sound and it's current player state
+    struct PlayerState{
+        var isPaused = false
+        var isPlaying = false
+        var voiceSound: VoiceSound?
+        
+        func isPlaying(for voiceSound: VoiceSound?) -> Bool{
+            if voiceSound?.fullPath == self.voiceSound?.fullPath && self.voiceSound?.fullPath.isEmpty == false{
+                return self.isPlaying
+            }
+            return false
+        }
+    }
+    
     var audioNodes: AudioNodes!
     
     var delegate: PlayerDelegate?
     
-    var isPaused: Bool = false
+    var playerState = PlayerState()
     
     ///Initializtion that initiates an audio engine
     init(){
@@ -48,6 +62,10 @@ class Player{
     ///Play an audio file from voice sound class
     func playFile(voiceSound: VoiceSound) throws{
         do{
+            if self.playerState.isPlaying{
+                self.stopPlaying()
+            }
+            
             Player.shared.setPlayback()
             
             guard let buffer = voiceSound.audioFile?.buffer else{
@@ -74,7 +92,12 @@ class Player{
                 self.delegate?.didPlayerStopPlaying()
             }
             self.audioNodes.audioPlayer.play()
-            isPaused = false
+            
+            playerState.isPaused = false
+            playerState.isPlaying = true
+            playerState.voiceSound = voiceSound
+            
+            self.delegate?.didPlayerStartPlaying()
         }
         catch{
             throw error
@@ -83,21 +106,24 @@ class Player{
     
     ///Resumes the audioPlayer
     func resume(){
-        if isPaused{
+        if playerState.isPaused{
             self.audioNodes.audioPlayer.play()
-            isPaused = false
+            playerState.isPaused = false
         }
     }
     
     ///Pauses the audioPlayer
     func pause(){
         self.audioNodes.audioPlayer.pause()
-        isPaused = true
+        playerState.isPaused = true
+        playerState.isPlaying = false
     }
     
     ///Stops the audioPlayer
     func stopPlaying(){
         self.audioNodes.audioPlayer.stop()
+        self.delegate?.didPlayerStopPlaying()
+        playerState = PlayerState()
     }
     
     ///Set avaudio session playback
@@ -129,4 +155,5 @@ extension Player.PlayingError: LocalizedError{
 }
 protocol PlayerDelegate{
     func didPlayerStopPlaying()
+    func didPlayerStartPlaying()
 }

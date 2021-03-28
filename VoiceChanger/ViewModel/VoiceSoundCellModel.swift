@@ -18,14 +18,17 @@ class VoiceSoundCellModel{
         }
     }
     
+    weak var listViewController: ListViewController?
+    
     ///Height of the cell
+    var defaultHeight: CGFloat = 50
     private var _height: CGFloat = 0.0
     var height: CGFloat{
         set(value){
             self._height = value
         }
         get{
-            return isSelected == true ? self._height * 2 : self._height
+            return isSelected == true ? self._height * 3 : self._height
         }
     }
     
@@ -33,24 +36,28 @@ class VoiceSoundCellModel{
     var edges = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     
     ///Is currently selected
-    var isSelected: Bool = false
-    
-    ///Returns the duration of voice sound in time components
-    var duration: TimeComponents{
-        get{
-            guard let secondsDuration = voiceSound?.duration else{
-                return TimeComponents()
-            }
-            var timeComponents = TimeComponents()
-            timeComponents.minutes = Int(secondsDuration / 60)
-            timeComponents.seconds = Int(secondsDuration) - timeComponents.minutes * 60
-            timeComponents.miliseconds = Int((secondsDuration - Double(Int(secondsDuration))) * 10)
-            return timeComponents
+    var isSelected: Bool = false{
+        didSet{
+            didSelect?(self.isSelected)
         }
     }
     
-    init(voiceSound: VoiceSound?){
+    ///On selection state change
+    var didSelect: ((Bool) -> Void)?
+    
+    
+    
+    init(voiceSound: VoiceSound?, listViewController: ListViewController?){
         self.voiceSound = voiceSound
-        self.height = 70.0
+        self.height = defaultHeight
+        self.listViewController = listViewController
+    }
+    
+    ///Remove the cell
+    func didRemoveButtonClicked(cell: VoiceSoundCell?){
+        guard let cell = cell else{
+            return
+        }
+        self.listViewController?.collectionViewDeleteAction(cell: cell)
     }
 }

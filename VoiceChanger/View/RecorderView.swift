@@ -28,7 +28,7 @@ class RecorderView: UIView{
     
     ///Returns the audioWave
     lazy var audioWave: RecorderAudioWave = {
-        let view = RecorderAudioWave(spacing: 1, tileWidth: nil, audioWaveModel: AudioWaveModel(numberOfTiles: 80, refreshInterval: 0.05))
+        let view = RecorderAudioWave(spacing: 1, tileWidth: nil, audioWaveModel: AudioWaveModel(numberOfTiles: 80, refreshInterval: 0.15))
         view.backgroundColor = .clear
         view.translatesAutoresizingMaskIntoConstraints = false
         view.heightAnchor.constraint(equalToConstant: 58).isActive = true
