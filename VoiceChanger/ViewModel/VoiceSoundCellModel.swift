@@ -11,6 +11,8 @@ import UIKit
 class VoiceSoundCellModel{
     var voiceSound: VoiceSound?
     
+    var playerViewModel: PlayerViewModel?
+    
     ///Returns the name of the cell
     var name: String?{
         get{
@@ -28,7 +30,7 @@ class VoiceSoundCellModel{
             self._height = value
         }
         get{
-            return isSelected == true ? self._height * 3 : self._height
+            return isSelected == true ? self._height * 4 : self._height
         }
     }
     
@@ -51,6 +53,9 @@ class VoiceSoundCellModel{
         self.voiceSound = voiceSound
         self.height = defaultHeight
         self.listViewController = listViewController
+        if voiceSound != nil{
+            self.playerViewModel = PlayerViewModel(voiceSound: voiceSound!)
+        }
     }
     
     ///Remove the cell

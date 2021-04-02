@@ -55,24 +55,76 @@ class PlayerView: UIView{
         return label
     }()
     
+    ///Play button
     private lazy var playButton: UIButton = {
         let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        button.setImage(UIImage(named: "play"), for: .normal)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.widthAnchor.constraint(equalToConstant: 35).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 35).isActive = true
+        button.addTarget(self, action: #selector(didClickOnPlayButton), for: .touchUpInside)
         return button
     }()
     
-    private var previousValue: Float = 0.0
+    ///Forward button
+    private lazy var forwardButton: UIButton = {
+        return createSkipButton(type: .forward)
+    }()
     
-    ///Updates the view components on change of timeComponents
-    func updateOnChange(){
-        self.currentTimeLabel.updateText(from: self.playerViewModel.sliderComponents)
-        self.remainingTimeLabel.updateText(from: self.playerViewModel.remainingComponents)
+    ///Back button
+    private lazy var backButton: UIButton = {
+        return createSkipButton(type: .back)
+    }()
+    
+    ///Options
+    private lazy var options: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Options", for: .normal)
+        button.setTitleColor(UIColor(red: 0, green: 122/255, blue: 1, alpha: 1), for: .normal)
+        button.sizeToFit()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.widthAnchor.constraint(equalToConstant: button.frame.width).isActive = true
+        button.heightAnchor.constraint(equalToConstant: button.frame.height).isActive = true
+        return UIButton()
+    }()
+    
+    enum SkipButtonType{
+        case forward
+        case back
     }
+    
+    ///Creates the skip button
+    func createSkipButton(type: SkipButtonType) -> UIButton{
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+        button.setImage(UIImage(named: type == .forward ? "5secondskip" : "5skipback"), for: .normal)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        button.tag = type == .forward ? 1 : 2
+        button.addTarget(self, action: #selector(didClickOnSkipButton(sender:)), for: .touchUpInside)
+        return button
+    }
+    
+    
+    @objc func didClickOnPlayButton(){
+        self.playerViewModel.didClickOnPlayButton()
+    }
+    
+    @objc func didClickOnSkipButton(sender: UIButton){
+        self.playerViewModel.didClickOnSkipButton(typeOfSkipButton: sender.tag == 1 ? .forward : .back)
+    }
+    
+    private var previousValue: Float = 0.0
+
     
     ///did change value of player slider
     @objc func didChangeValue(sender: UISlider){
         if sender.value != previousValue{
-            self.playerViewModel.updateSliderComponents(sliderValue: sender.value)
-            updateOnChange()
+            self.playerViewModel.didChangeTheValueOfSlider(value: sender.value)
             self.previousValue = sender.value
         }
     }
@@ -82,6 +134,7 @@ class PlayerView: UIView{
         guard let duration = playerViewModel.voiceSound?.duration else{
             return
         }
+        
         playerSlider.minimumValue = 0
         playerSlider.maximumValue = playerViewModel.returnSliderValue(current: duration)
         
@@ -89,11 +142,27 @@ class PlayerView: UIView{
         remainingTimeLabel.updateText(from: playerViewModel.remainingComponents)
         
         playerViewModel.onPlayStateChange = { [weak self] isPlaying in
-            if isPlaying{
-                
+            DispatchQueue.main.async{
+                if isPlaying{
+                    self?.playButton.setImage(UIImage(named: "stop"), for: .normal)
+                }
+                else{
+                    self?.playButton.setImage(UIImage(named: "play"), for: .normal)
+                }
             }
-            else{
-                
+        }
+        
+        playerViewModel.onPlayerTimerChange = {  timer in
+            let value = Float(timer.currTime)
+            playerViewModel.updateSliderComponents(sliderValue: value)
+        }
+        
+        playerViewModel.onSliderComponentChange = { [weak self] in
+            let value: Float = Float(playerViewModel.sliderComponents.returnCombinedMiliseconds())
+            DispatchQueue.main.async {
+                self?.playerSlider.setValue(value, animated: false)
+                self?.currentTimeLabel.updateText(from: self?.playerViewModel.sliderComponents)
+                self?.remainingTimeLabel.updateText(from: self?.playerViewModel.remainingComponents)
             }
         }
     }
@@ -102,8 +171,8 @@ class PlayerView: UIView{
         
         self.addSubview(playerSlider)
         
-        playerSlider.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 50).isActive = true
-        playerSlider.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -50).isActive = true
+        playerSlider.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 35).isActive = true
+        playerSlider.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -35).isActive = true
         playerSlider.topAnchor.constraint(equalTo: self.topAnchor, constant: 0).isActive = true
         
         self.addSubview(currentTimeLabel)
@@ -115,6 +184,26 @@ class PlayerView: UIView{
         
         remainingTimeLabel.trailingAnchor.constraint(equalTo: playerSlider.trailingAnchor).isActive = true
         remainingTimeLabel.topAnchor.constraint(equalTo: playerSlider.bottomAnchor, constant: -5).isActive = true
+        
+        self.addSubview(playButton)
+
+        playButton.topAnchor.constraint(equalTo: playerSlider.bottomAnchor, constant: 20).isActive = true
+        playButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        
+        self.addSubview(forwardButton)
+        
+        forwardButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor).isActive = true
+        forwardButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 20).isActive = true
+        
+        self.addSubview(backButton)
+        
+        backButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor).isActive = true
+        backButton.trailingAnchor.constraint(equalTo: playButton.leadingAnchor, constant: -20).isActive = true
+        
+        self.addSubview(options)
+        
+        options.centerYAnchor.constraint(equalTo: playButton.centerYAnchor).isActive = true
+        options.trailingAnchor.constraint(equalTo: playerSlider.trailingAnchor).isActive = true
     }
     
     init(playerViewModel: PlayerViewModel){

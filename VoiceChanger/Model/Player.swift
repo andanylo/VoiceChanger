@@ -8,6 +8,7 @@
 import Foundation
 import AVFoundation
 
+
 ///Class that plays an audio file with effects
 class Player{
     static var shared = Player()
@@ -32,70 +33,57 @@ class Player{
         
     }
     
-    ///Structure with voice sound and it's current player state
-    struct PlayerState{
-        var isPaused = false
-        var isPlaying = false
-        var voiceSound: VoiceSound?
-        
-        func isPlaying(for voiceSound: VoiceSound?) -> Bool{
-            if voiceSound?.fullPath == self.voiceSound?.fullPath && self.voiceSound?.fullPath.isEmpty == false{
-                return self.isPlaying
-            }
-            return false
-        }
-    }
     
     var audioNodes: AudioNodes!
     
     var delegate: PlayerDelegate?
     
-    var playerState = PlayerState()
+    var currentVoiceSound: VoiceSound?
+    
+    private var playerTimer = CustomTimer(timeInterval: 0.001)
     
     ///Initializtion that initiates an audio engine
     init(){
         self.audioNodes = AudioNodes(audioEngine: AudioEngine(), audioPlayer: AudioPlayerNode(), pitchAndSpeedNode: AVAudioUnitTimePitch(), distortionNode: AVAudioUnitDistortion(), reverbNode: AVAudioUnitReverb())
+        self.playerTimer.delegate = self
     }
-    
+
     
     
     ///Play an audio file from voice sound class
-    func playFile(voiceSound: VoiceSound) throws{
+    func playFile(voiceSound: VoiceSound, at time: TimeComponents) throws{
         do{
-            if self.playerState.isPlaying{
-                self.stopPlaying()
-            }
             
             Player.shared.setPlayback()
             
-            guard let buffer = voiceSound.audioFile?.buffer else{
-                throw PlayingError.cantScheduleBuffer
+            guard let file = voiceSound.audioFile else{
+                throw PlayingError.cantFindFile
             }
-            try voiceSound.audioFile?.read(into: buffer)
-            
-            self.audioNodes.audioPlayer.file = voiceSound.audioFile
-            self.audioNodes.setEffects(effects: voiceSound.effects)
-            
-            self.audioNodes.audioEngine.attachAndConnect([
-                self.audioNodes.audioPlayer,
-                self.audioNodes.pitchAndSpeedNode,
-                self.audioNodes.distortionNode,
-                self.audioNodes.reverbNode
-            ], format: buffer.format)
-
-            if !self.audioNodes.audioEngine.isRunning{
-                self.audioNodes.audioEngine.prepare()
-                try self.audioNodes.audioEngine.start()
+            if self.audioNodes.audioPlayer.file != voiceSound.audioFile{
+                
+                self.audioNodes.audioPlayer.file = voiceSound.audioFile
+                self.audioNodes.setEffects(effects: voiceSound.effects)
+                
+                self.audioNodes.audioEngine.attachAndConnect([
+                    self.audioNodes.audioPlayer,
+                    self.audioNodes.pitchAndSpeedNode,
+                    self.audioNodes.distortionNode,
+                    self.audioNodes.reverbNode
+                ], format: file.processingFormat)
+                
+                if !self.audioNodes.audioEngine.isRunning{
+                    self.audioNodes.audioEngine.prepare()
+                    try self.audioNodes.audioEngine.start()
+                }
+    
             }
+            try self.audioNodes.audioPlayer.play(from: time)
             
-            self.audioNodes.audioPlayer.scheduleBuffer(buffer) {
-                self.delegate?.didPlayerStopPlaying()
-            }
-            self.audioNodes.audioPlayer.play()
+            self.currentVoiceSound = voiceSound
+            self.currentVoiceSound?.playerState.isPlaying = true
             
-            playerState.isPaused = false
-            playerState.isPlaying = true
-            playerState.voiceSound = voiceSound
+            playerTimer.setCurrentTime(from: time)
+            playerTimer.start()
             
             self.delegate?.didPlayerStartPlaying()
         }
@@ -104,26 +92,25 @@ class Player{
         }
     }
     
-    ///Resumes the audioPlayer
-    func resume(){
-        if playerState.isPaused{
-            self.audioNodes.audioPlayer.play()
-            playerState.isPaused = false
+    ///Method that executes after the player stopped playing
+    private func didStop(isPausing: Bool){
+
+        playerTimer.pause()
+        
+        if !isPausing{
+            playerTimer.reset()
         }
-    }
-    
-    ///Pauses the audioPlayer
-    func pause(){
-        self.audioNodes.audioPlayer.pause()
-        playerState.isPaused = true
-        playerState.isPlaying = false
+        currentVoiceSound?.playerState.reset()
+        
+        delegate?.didPlayerStopPlaying()
+        
+        currentVoiceSound = nil
     }
     
     ///Stops the audioPlayer
-    func stopPlaying(){
+    func stopPlaying(isPausing: Bool){
         self.audioNodes.audioPlayer.stop()
-        self.delegate?.didPlayerStopPlaying()
-        playerState = PlayerState()
+        didStop(isPausing: isPausing)
     }
     
     ///Set avaudio session playback
@@ -140,15 +127,25 @@ class Player{
     }
     
     enum PlayingError: Error{
-        case cantScheduleBuffer
+        case cantFindFile
     }
 }
+extension Player: CustomTimerDelegate{
+    ///Stop the player if current time is greater than duration
+    func timerBlock(timer: CustomTimer) {
+        if self.audioNodes.audioPlayer.currentTime >= self.audioNodes.audioPlayer.duration{
+            stopPlaying(isPausing: false)
+        }
+        delegate?.didUpdateTimer(timer: timer)
+    }
+}
+
 extension Player.PlayingError: LocalizedError{
     var errorDescription: String?{
         get{
             switch self {
-            case .cantScheduleBuffer:
-                return "Can't schedule buffer"
+            case .cantFindFile:
+                return "Can't find file"
             }
         }
     }
@@ -156,4 +153,5 @@ extension Player.PlayingError: LocalizedError{
 protocol PlayerDelegate{
     func didPlayerStopPlaying()
     func didPlayerStartPlaying()
+    func didUpdateTimer(timer: CustomTimer)
 }

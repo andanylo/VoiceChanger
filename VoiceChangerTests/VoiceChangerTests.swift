@@ -54,6 +54,13 @@ class VoiceChangerTests: XCTestCase {
         XCTAssertTrue(timer.timeComponents.minutes < 60 && timer.timeComponents.seconds < 60 && timer.timeComponents.miliseconds < 1000)
     }
     
+    func testTimeComponents(){
+        let timeComponents = TimeComponents(seconds: 16, minutes: 0, miliseconds: 9)
+        let timeComponents2 = TimeComponents(seconds: 9, minutes: 0, miliseconds: 866)
+        XCTAssertEqual(timeComponents.returnSeconds(), 16.009)
+        XCTAssertEqual(timeComponents2.returnCombinedMiliseconds(), 9866)
+    }
+    
     
 
     func testPerformanceExample() throws {

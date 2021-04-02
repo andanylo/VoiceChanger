@@ -67,6 +67,7 @@ class ListViewController: UIViewController {
         for i in cells{
             i.didChangeEditingState(isEditing: self.isEditing)
         }
+        
     }
 
     
@@ -97,6 +98,8 @@ class ListViewController: UIViewController {
         
         recordButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         recordButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20).isActive = true
+        
+        Player.shared.delegate = self
     }
     
     override func viewDidLayoutSubviews() {
@@ -193,4 +196,36 @@ extension ListViewController: RecordViewControllerDelegate{
             self.collectionView.insertItems(at: [IndexPath(row: self.voiceSoundCellModels.count - 1, section: 0)])
         }
     }
+}
+
+extension ListViewController: PlayerDelegate{
+    func didUpdateTimer(timer: CustomTimer) {
+      
+        guard let currentVoiceModel = findCurrentPlayingVoiceSoundCellModel() else{
+            return
+        }
+        
+        currentVoiceModel.playerViewModel?.onPlayerTimerChange?(timer)
+    }
+    
+    func didPlayerStopPlaying() {
+        changeThePlayerState(isPlaying: false)
+    }
+    
+    func didPlayerStartPlaying() {
+        changeThePlayerState(isPlaying: true)
+    }
+    private func changeThePlayerState(isPlaying: Bool){
+        guard let currentVoiceModel = findCurrentPlayingVoiceSoundCellModel() else{
+            return
+        }
+        currentVoiceModel.playerViewModel?.onPlayStateChange?(isPlaying)
+    }
+    private func findCurrentPlayingVoiceSoundCellModel() -> VoiceSoundCellModel?{
+        guard let currentVoiceModel = voiceSoundCellModels.first(where: {$0.voiceSound?.fullPath == Player.shared.currentVoiceSound?.fullPath && $0.voiceSound?.fullPath.isEmpty == false}) else{
+            return nil
+        }
+        return currentVoiceModel
+    }
+    
 }

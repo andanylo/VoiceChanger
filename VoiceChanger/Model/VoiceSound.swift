@@ -10,6 +10,16 @@ import CoreData
 
 class VoiceSound{
     
+    ///Structure with voice sound and it's current player state
+    struct PlayerState{
+        var isPlaying = false
+        mutating func reset(){
+            self.isPlaying = false
+        }
+    }
+    
+    var playerState: PlayerState = PlayerState()
+    
     var pathComponent: String = ""
     
     ///Returns the url from a path component
@@ -56,11 +66,7 @@ class VoiceSound{
     var duration: TimeComponents{
         get{
             let secondsDuration = self._duration
-            var timeComponents = TimeComponents()
-            timeComponents.minutes = Int(secondsDuration / 60)
-            timeComponents.seconds = Int(secondsDuration) - timeComponents.minutes * 60
-            timeComponents.miliseconds = Int((secondsDuration - Double(Int(secondsDuration))) * 10)
-            return timeComponents
+            return TimeComponents(seconds: secondsDuration)
         }
     }
     

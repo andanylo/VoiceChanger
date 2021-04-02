@@ -16,10 +16,22 @@ class AudioFile: AVAudioFile{
             return AVAudioFrameCount(self.length)
         }
     }
+
+    
+    func returnRemainingDuration(currentPosition: AVAudioFramePosition) -> AVAudioFrameCount{
+        if AVAudioFrameCount(frameCount) > AVAudioFrameCount(currentPosition){
+            return AVAudioFrameCount(frameCount - AVAudioFrameCount(currentPosition))
+        }
+        return AVAudioFrameCount(1)
+    }
     
     ///Creates a pcm buffer
     lazy var buffer: AVAudioPCMBuffer? = {
-        return AVAudioPCMBuffer(pcmFormat: self.processingFormat, frameCapacity: frameCount)
+        guard let newBuffer = AVAudioPCMBuffer(pcmFormat: self.processingFormat, frameCapacity: frameCount) else{
+            return nil
+        }
+        try? self.read(into: newBuffer)
+        return newBuffer
     }()
     
     ///Returns the duration of the file in seconds

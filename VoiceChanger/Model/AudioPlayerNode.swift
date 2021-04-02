@@ -23,13 +23,16 @@ class AudioPlayerNode: AVAudioPlayerNode{
         }
     }
     
+    ///Seconds from what player should start
+    private var startSeconds: Double = 0.0
+    
     ///Returns the current time of audio player node
     var currentTime: Double{
         get{
             if let nodeTime: AVAudioTime = self.lastRenderTime, let playerTime: AVAudioTime = self.playerTime(forNodeTime: nodeTime) {
-                return Double(playerTime.sampleTime) / playerTime.sampleRate
+                return startSeconds + Double(playerTime.sampleTime) / playerTime.sampleRate
             }
-            return 0.0
+            return startSeconds
         }
     }
     
@@ -41,5 +44,26 @@ class AudioPlayerNode: AVAudioPlayerNode{
     
     override init(){
         super.init()
+    }
+    
+    ///Play from start components
+    func play(from startComponents: TimeComponents) throws{
+        guard let file = self.file else{
+            return
+        }
+        self.startSeconds = startComponents.returnSeconds()
+        let position = AVAudioFramePosition(self.startSeconds * self.outputFormat(forBus: 0).sampleRate)
+        self.scheduleSegment(file, startingFrame: position, frameCount: file.returnRemainingDuration(currentPosition: position), at: nil, completionHandler: nil)
+        
+        super.play()
+    }
+    
+    override func stop() {
+        super.stop()
+        self.startSeconds = 0.0
+    }
+    
+    enum PlayerNodeError: Error{
+        case fileNotExists
     }
 }

@@ -24,7 +24,6 @@ class CustomTimer{
     
     var timeComponents: TimeComponents = TimeComponents()
     
-    
     var delegate: CustomTimerDelegate?
     
     var timeInterval = 0.0
@@ -53,10 +52,9 @@ class CustomTimer{
     
     ///Resets the timer
     func reset(){
-        if isRunning{
-            pause()
-        }
+        pause()
         currTime = 0
+        self.delegate?.timerBlock(timer: self)
     }
     
     

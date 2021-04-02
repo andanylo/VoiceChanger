@@ -57,7 +57,9 @@ class VoiceSoundCell: UICollectionViewCell{
             
             audioFileDurationLabel.updateText(from: voiceSound.duration)
             
-            playerView.playerViewModel = PlayerViewModel(voiceSound: voiceSound)
+            if voiceSoundCellModel?.playerViewModel != nil{
+                playerView.playerViewModel = voiceSoundCellModel?.playerViewModel
+            }
 
             var rotationAngle: CGFloat = voiceSoundCellModel?.isSelected == true ? CGFloat.pi / 2 : 0
             oldValue?.didSelect = nil
@@ -65,12 +67,16 @@ class VoiceSoundCell: UICollectionViewCell{
             voiceSoundCellModel?.didSelect = { selected in
                 rotationAngle = selected == true ? CGFloat.pi / 2 : 0
                 
+                if selected && Player.shared.currentVoiceSound?.playerState.isPlaying == true{
+                    Player.shared.stopPlaying(isPausing: false)
+                }
                 UIView.animate(withDuration: 0.2) {
                     self.disclosureIndicator.transform = CGAffineTransform(rotationAngle: rotationAngle)
                 }
             }
         }
     }
+    
     
     ///Label that displays the length of audio file
     private lazy var audioFileDurationLabel: TimerLabel = {
@@ -93,7 +99,8 @@ class VoiceSoundCell: UICollectionViewCell{
         self.contentView.subviews.forEach({$0.removeFromSuperview()})
         leadingNameLabelConstraint?.isActive = false
         leadingNameLabelConstraint = nil
-        
+        self.voiceSoundCellModel?.playerViewModel?.onPlayStateChange = nil
+        self.voiceSoundCellModel?.playerViewModel?.onPlayerTimerChange = nil
     }
     
     @objc func removeAction(){

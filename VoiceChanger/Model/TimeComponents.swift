@@ -12,6 +12,13 @@ struct TimeComponents{
     var seconds: Int = 0
     var minutes: Int = 0
     var miliseconds: Int = 0
+    init(miliseconds: Int){
+        convertFromMiliseconds(miliseconds: miliseconds)
+    }
+    init(seconds: Double){
+        convertFromSeconds(seconds: seconds)
+    }
+    init(){}
     func returnCombinedMiliseconds() -> Int{
         return self.miliseconds + self.seconds * 1000 + self.minutes * 60 * 1000
     }

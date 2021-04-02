@@ -59,8 +59,8 @@ class CoreData{
                 }
             }
             else{
-                let effects = EffectsEntity(entity: effectsEntityDescription, insertInto: context)
-                
+                var effects = EffectsEntity(entity: effectsEntityDescription, insertInto: context)
+                effects = effects.convertFromObject(object: sound.effects) as! EffectsEntity
                 newEntity.effects = effects
             }
             

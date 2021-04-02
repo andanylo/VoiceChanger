@@ -11,29 +11,56 @@ class PlayerViewModel{
     
     var onPlayStateChange: ((Bool) -> Void)?
     
+    var onPlayerTimerChange: ((CustomTimer) -> Void)?
+    
+    var onSliderComponentChange: (() -> Void)?
+    
     ///Method that handles whenever the
     func didClickOnPlayButton(){
         guard let voiceSound = voiceSound else{
             return
         }
         
-        var isPlaying = Player.shared.playerState.isPlaying(for: voiceSound)
-        if !isPlaying{
+        ///If other sound is currently playing, stop it
+        if Player.shared.currentVoiceSound?.playerState.isPlaying == true && Player.shared.currentVoiceSound?.fullPath != voiceSound.fullPath{
+            Player.shared.stopPlaying(isPausing: false)
+        }
+
+        if !voiceSound.playerState.isPlaying{
             do{
-                try Player.shared.playFile(voiceSound: voiceSound)
+                try Player.shared.playFile(voiceSound: voiceSound, at: sliderComponents)
             }
             catch{
                 
             }
         }
         else{
-            if !Player.shared.playerState.isPaused{
-                Player.shared.pause()
-            }
+            Player.shared.stopPlaying(isPausing: true)
         }
-        isPlaying = Player.shared.playerState.isPlaying(for: voiceSound)
+    }
+    
+    ///Method that gets called on skip button click
+    func didClickOnSkipButton(typeOfSkipButton: PlayerView.SkipButtonType){
+        if Player.shared.currentVoiceSound?.playerState.isPlaying == true{
+            Player.shared.stopPlaying(isPausing: true)
+        }
         
-        onPlayStateChange?(isPlaying)
+        if typeOfSkipButton == .forward{
+            updateSliderComponents(seconds: min(sliderSeconds + 5, voiceSound?.duration.returnSeconds() ?? 0))
+        }
+        else{
+            updateSliderComponents(seconds: max(sliderSeconds - 5, 0))
+        }
+    }
+    
+    ///Method that gets called after slider has changed it's value
+    func didChangeTheValueOfSlider(value: Float){
+        updateSliderComponents(sliderValue: value)
+        
+        let isPlaying = Player.shared.currentVoiceSound?.playerState.isPlaying
+        if isPlaying == true{
+            Player.shared.stopPlaying(isPausing: true)
+        }
     }
     
     ///Returns the slider value converted from TimeComponents
@@ -41,11 +68,15 @@ class PlayerViewModel{
         return Float(components.returnCombinedMiliseconds())
     }
     
+    private var sliderSeconds: Double = 0.0
+    
     var sliderComponents: TimeComponents = TimeComponents(){
         didSet{
             let durationSeconds: Double = voiceSound?.duration.returnSeconds() ?? 0
-            let sliderSeconds: Double = sliderComponents.returnSeconds()
+            sliderSeconds = sliderComponents.returnSeconds()
             remainingComponents.convertFromSeconds(seconds: durationSeconds - sliderSeconds)
+            
+            onSliderComponentChange?()
         }
     }
     var remainingComponents: TimeComponents = TimeComponents()
