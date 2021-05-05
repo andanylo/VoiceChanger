@@ -7,7 +7,7 @@
 
 import Foundation
 import CoreData
-
+import AVFoundation
 ///Structure that has effects for the sound
 class Effects: NSObject{
     var speed: Float = 1.0
@@ -15,6 +15,9 @@ class Effects: NSObject{
     var distortion: Float = 0.0
     var reverb: Float = 0.0
     
+    ///Presets for default effects
+    var distortionPreset: AVAudioUnitDistortionPreset = .drumsBitBrush
+    var reverbPreset: AVAudioUnitReverbPreset = .mediumHall
     
     ///Initialize the structure with parameters
     init(speed: Float, pitch: Float, distortion: Float, reverb: Float){

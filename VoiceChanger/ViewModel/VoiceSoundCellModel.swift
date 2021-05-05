@@ -9,9 +9,21 @@ import Foundation
 import UIKit
 
 class VoiceSoundCellModel{
-    var voiceSound: VoiceSound?
+    var voiceSound: VoiceSound?{
+        didSet{
+            if voiceSound != nil{
+                setPlayerViewModel(voiceSound: voiceSound!)
+            }
+        }
+    }
     
-    var playerViewModel: PlayerViewModel?
+    var playerViewModel: PlayerViewModel?{
+        didSet{
+            self.playerViewModel?.onClickOptionsButton = {
+                self.presentOptions()
+            }
+        }
+    }
     
     ///Returns the name of the cell
     var name: String?{
@@ -24,13 +36,18 @@ class VoiceSoundCellModel{
     
     ///Height of the cell
     var defaultHeight: CGFloat = 50
+    var expandedHeight: CGFloat{
+        get{
+            return defaultHeight * 4
+        }
+    }
     private var _height: CGFloat = 0.0
     var height: CGFloat{
         set(value){
             self._height = value
         }
         get{
-            return isSelected == true ? self._height * 4 : self._height
+            return isSelected == true ? expandedHeight : defaultHeight
         }
     }
     
@@ -47,14 +64,22 @@ class VoiceSoundCellModel{
     ///On selection state change
     var didSelect: ((Bool) -> Void)?
     
-    
+    func setPlayerViewModel(voiceSound: VoiceSound){
+        self.playerViewModel = PlayerViewModel(voiceSound: voiceSound)
+        self.playerViewModel?.onClickOptionsButton = {
+            self.presentOptions()
+        }
+        self.playerViewModel?.onEffectCreate = {
+            self.presentEffectCreator()
+        }
+    }
     
     init(voiceSound: VoiceSound?, listViewController: ListViewController?){
         self.voiceSound = voiceSound
         self.height = defaultHeight
         self.listViewController = listViewController
-        if voiceSound != nil{
-            self.playerViewModel = PlayerViewModel(voiceSound: voiceSound!)
+        if self.playerViewModel == nil && voiceSound != nil{
+            setPlayerViewModel(voiceSound: voiceSound!)
         }
     }
     
@@ -64,5 +89,30 @@ class VoiceSoundCellModel{
             return
         }
         self.listViewController?.collectionViewDeleteAction(cell: cell)
+    }
+    
+    ///tell the view controller to present options of sound
+    func presentOptions(){
+        guard let voiceSound = voiceSound else{
+            return
+        }
+        DispatchQueue.main.async {
+            self.listViewController?.presentOptions(voiceSound: voiceSound)
+        }
+    }
+    
+    ///tell the view controller to present effect creator
+    func presentEffectCreator(){
+        DispatchQueue.main.async {
+            self.listViewController?.presentEffectCreator()
+        }
+    }
+    
+    ///Changes selected and tells the view controller
+    func changeSelected(){
+        self.isSelected = isSelected == false ? true : false
+        DispatchQueue.main.async {
+            self.listViewController?.changeSelected(voiceSoundCellModel: self)
+        }
     }
 }

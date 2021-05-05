@@ -81,13 +81,24 @@ class PlayerView: UIView{
     ///Options
     private lazy var options: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Options", for: .normal)
-        button.setTitleColor(UIColor(red: 0, green: 122/255, blue: 1, alpha: 1), for: .normal)
-        button.sizeToFit()
+        button.setImage(UIImage(named: "dots"), for: .normal)
+        button.tintColor = .black
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.sizeToFit()
+        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
         button.widthAnchor.constraint(equalToConstant: button.frame.width).isActive = true
         button.heightAnchor.constraint(equalToConstant: button.frame.height).isActive = true
-        return UIButton()
+        button.addTarget(self, action: #selector(didClickOnOptionsButton), for: .touchUpInside)
+        return button
+    }()
+    
+    ///Returns  the effect templates view
+    private lazy var effectTemplatesView: EffectsPicker = {
+        let effectsPicker = EffectsPicker()
+        effectsPicker.translatesAutoresizingMaskIntoConstraints = false
+        effectsPicker.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        effectsPicker.backgroundColor = .white
+        return effectsPicker
     }()
     
     enum SkipButtonType{
@@ -110,12 +121,16 @@ class PlayerView: UIView{
     }
     
     
+    
     @objc func didClickOnPlayButton(){
         self.playerViewModel.didClickOnPlayButton()
     }
     
     @objc func didClickOnSkipButton(sender: UIButton){
         self.playerViewModel.didClickOnSkipButton(typeOfSkipButton: sender.tag == 1 ? .forward : .back)
+    }
+    @objc func didClickOnOptionsButton(){
+        self.playerViewModel.onClickOptionsButton?()
     }
     
     private var previousValue: Float = 0.0
@@ -138,8 +153,14 @@ class PlayerView: UIView{
         playerSlider.minimumValue = 0
         playerSlider.maximumValue = playerViewModel.returnSliderValue(current: duration)
         
-        playerSlider.value = 0.0
-        remainingTimeLabel.updateText(from: playerViewModel.remainingComponents)
+        let updateFromViewModel = { [weak self] in
+            let value: Float = Float(playerViewModel.returnSliderValue(current: playerViewModel.sliderComponents))
+            DispatchQueue.main.async {
+                self?.playerSlider.setValue(value, animated: false)
+                self?.currentTimeLabel.updateText(from: self?.playerViewModel.sliderComponents)
+                self?.remainingTimeLabel.updateText(from: self?.playerViewModel.remainingComponents)
+            }
+        }
         
         playerViewModel.onPlayStateChange = { [weak self] isPlaying in
             DispatchQueue.main.async{
@@ -152,23 +173,19 @@ class PlayerView: UIView{
             }
         }
         
-        playerViewModel.onPlayerTimerChange = {  timer in
-            let value = Float(timer.currTime)
+        playerViewModel.onPlayerCurrentTimeChange = { timeComponents in
+            let value = Float(timeComponents.returnCombinedMiliseconds())
             playerViewModel.updateSliderComponents(sliderValue: value)
         }
         
-        playerViewModel.onSliderComponentChange = { [weak self] in
-            let value: Float = Float(playerViewModel.sliderComponents.returnCombinedMiliseconds())
-            DispatchQueue.main.async {
-                self?.playerSlider.setValue(value, animated: false)
-                self?.currentTimeLabel.updateText(from: self?.playerViewModel.sliderComponents)
-                self?.remainingTimeLabel.updateText(from: self?.playerViewModel.remainingComponents)
-            }
-        }
+        playerViewModel.onSliderComponentChange = updateFromViewModel
+        updateFromViewModel()
+        
+        effectTemplatesView.delegate = playerViewModel
     }
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+
         self.addSubview(playerSlider)
         
         playerSlider.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 35).isActive = true
@@ -201,9 +218,16 @@ class PlayerView: UIView{
         backButton.trailingAnchor.constraint(equalTo: playButton.leadingAnchor, constant: -20).isActive = true
         
         self.addSubview(options)
-        
+
         options.centerYAnchor.constraint(equalTo: playButton.centerYAnchor).isActive = true
         options.trailingAnchor.constraint(equalTo: playerSlider.trailingAnchor).isActive = true
+        
+        self.addSubview(effectTemplatesView)
+        
+        effectTemplatesView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        effectTemplatesView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        effectTemplatesView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+
     }
     
     init(playerViewModel: PlayerViewModel){

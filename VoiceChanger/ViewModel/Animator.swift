@@ -28,7 +28,7 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
         toView.layoutIfNeeded()
         transitionContext.containerView.addSubview(toView)
         
-        if firstController is ListViewController, let recorderViewController = secondController as? RecordViewController{
+        if firstController is ListViewController, let popUpViewController = secondController as? PopUpController{
             let backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
             backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0 : 0.4)
             backgroundView.translatesAutoresizingMaskIntoConstraints = false
@@ -40,15 +40,15 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             backgroundView.bottomAnchor.constraint(equalTo: transitionContext.containerView.bottomAnchor).isActive = true
             backgroundView.trailingAnchor.constraint(equalTo: transitionContext.containerView.trailingAnchor).isActive = true
             
-            guard let recordView = recorderViewController.recorderBackground.snapshotView(afterScreenUpdates: true) else{
+            guard let recordView = popUpViewController.mainView.snapshotView(afterScreenUpdates: true) else{
                 transitionContext.completeTransition(true)
                 return
             }
             
             transitionContext.containerView.addSubview(recordView)
             
-            let starterRect = CGRect(x: recorderViewController.recorderBackground.frame.origin.x, y: UIScreen.main.bounds.height, width: recorderViewController.recorderBackground.frame.width, height: recorderViewController.recorderBackground.frame.height)
-            let finalRect = recorderViewController.recorderBackground.frame
+            let starterRect = CGRect(x: popUpViewController.mainView.frame.origin.x, y: UIScreen.main.bounds.height, width: popUpViewController.mainView.frame.width, height: popUpViewController.mainView.frame.height)
+            let finalRect = popUpViewController.mainView.frame
             
             recordView.frame = presenting ? starterRect : finalRect
             UIView.animate(withDuration: duration / 1.8) {

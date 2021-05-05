@@ -22,7 +22,8 @@ class ListViewController: UIViewController {
         view.backgroundColor = UIColor.lightGray
         view.contentInset = UIEdgeInsets.init(top: 10, left: 10, bottom: 10, right: 10)
         view.backgroundColor = UIColor(red: 242 / 255, green: 242 / 255, blue: 247 / 255, alpha: 1)
-        
+        view.showsHorizontalScrollIndicator = false
+        view.showsVerticalScrollIndicator = false
         return view
     }()
     
@@ -54,7 +55,10 @@ class ListViewController: UIViewController {
         button.layer.shadowOffset = CGSize(width: 0, height: 3)
         button.layer.shadowRadius = 3
         button.layer.shadowOpacity = 0.6
-        button.addTarget(self, action: #selector(presentRecorder), for: .touchUpInside)
+        button.addTarget(self, action: #selector(didClickOnRecord), for: .touchUpInside)
+        button.setImage(UIImage(named: "microphone"), for: .normal)
+        button.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        button.imageView?.contentMode = .scaleAspectFit
         return button
     }()
     
@@ -111,14 +115,52 @@ class ListViewController: UIViewController {
         collectionViewFlowLayout.minimumLineSpacing = 10
         collectionView.layoutIfNeeded()
     }
-    
-    @objc func presentRecorder(){
-        let recordViewController = RecordViewController()
-        recordViewController.modalPresentationStyle = .overCurrentContext
+    func presentPopUp(type: PopUpController.PopUpCategory, objectToTransfer: AnyObject?){
+        let popUpController = PopUpController(rootViewController: self)
+        popUpController.popUpCategory = type
+        popUpController.objectToTransfer = objectToTransfer
+        popUpController.modalPresentationStyle = .overCurrentContext
         Animator.shared.duration = 0.72
-        recordViewController.delegate = self
-        recordViewController.transitioningDelegate = self
-        self.present(recordViewController, animated: true, completion: nil)
+        popUpController.transitioningDelegate = self
+        self.present(popUpController, animated: true, completion: nil)
+    }
+    
+    @objc func didClickOnRecord(){
+        presentRecorder(objectToTransfer: nil)
+    }
+    
+    func presentEffectCreator(){
+        presentPopUp(type: .effect, objectToTransfer: nil)
+    }
+    func presentRecorder(objectToTransfer: VoiceSound?){
+        presentPopUp(type: .record, objectToTransfer: objectToTransfer)
+    }
+    
+    func presentOptions(voiceSound: VoiceSound){
+        let options = UIAlertController(title: voiceSound.name, message: nil, preferredStyle: .actionSheet)
+        options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
+            
+        }))
+        options.addAction(UIAlertAction(title: "Rename", style: .default, handler: { (_) in
+            DispatchQueue.main.async {
+                let renameAlert = UIAlertController(title: "Rename sound", message: "Enter the new name below", preferredStyle: .alert)
+                renameAlert.addTextField { textField in
+                    
+                }
+                renameAlert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+                    
+                }))
+                renameAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                self.present(renameAlert, animated: true, completion: nil)
+            }
+        }))
+        options.addAction(UIAlertAction(title: "Rerecord", style: .default, handler: { (_) in
+            DispatchQueue.main.async {
+                self.presentRecorder(objectToTransfer: voiceSound)
+            }
+        }))
+        options.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.present(options, animated: true, completion: nil)
     }
 }
 
@@ -136,13 +178,16 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
         
         return cell
     }
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func changeSelected(voiceSoundCellModel: VoiceSoundCellModel){
         guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
             return
         }
-        let isSelected = voiceSoundCellModels[indexPath.row].isSelected
-        self.voiceSoundCellModels.forEach({$0.isSelected = false})
-        self.voiceSoundCellModels[indexPath.row].isSelected = isSelected == false ? true : false
+
+        self.voiceSoundCellModels.forEach({
+            if !($0 === voiceSoundCellModel){
+                $0.isSelected = false
+            }
+        })
         collectionView.performBatchUpdates {
 
         } completion: { (_) in
@@ -190,22 +235,31 @@ extension ListViewController: UIViewControllerTransitioningDelegate{
 
 extension ListViewController: RecordViewControllerDelegate{
     func willSave(voiceSound: VoiceSound) {
-        Variables.shared.recordList.list.append(voiceSound)
-        voiceSoundCellModels.append(VoiceSoundCellModel(voiceSound: voiceSound, listViewController: self))
-        DispatchQueue.main.async {
-            self.collectionView.insertItems(at: [IndexPath(row: self.voiceSoundCellModels.count - 1, section: 0)])
+        if let index = voiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}){
+            voiceSoundCellModels[index].voiceSound = voiceSound
+            DispatchQueue.main.async{
+                self.collectionView.reloadItems(at: [IndexPath(row: Int(index), section: 0)])
+            }
+            
+        }
+        else{
+            Variables.shared.recordList.list.append(voiceSound)
+            voiceSoundCellModels.append(VoiceSoundCellModel(voiceSound: voiceSound, listViewController: self))
+            DispatchQueue.main.async {
+                self.collectionView.insertItems(at: [IndexPath(row: self.voiceSoundCellModels.count - 1, section: 0)])
+            }
         }
     }
 }
 
 extension ListViewController: PlayerDelegate{
-    func didUpdateTimer(timer: CustomTimer) {
+    func didUpdateCurrentTime(currentTime: TimeComponents) {
       
         guard let currentVoiceModel = findCurrentPlayingVoiceSoundCellModel() else{
             return
         }
         
-        currentVoiceModel.playerViewModel?.onPlayerTimerChange?(timer)
+        currentVoiceModel.playerViewModel?.onPlayerCurrentTimeChange?(currentTime)
     }
     
     func didPlayerStopPlaying() {

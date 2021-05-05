@@ -13,16 +13,6 @@ class AudioPlayerNode: AVAudioPlayerNode{
     
     var file: AudioFile?
     
-    ///Returns the duration of audio file
-    var duration: Double{
-        get{
-            guard let file = self.file else{
-                return 0.0
-            }
-            return file.duration
-        }
-    }
-    
     ///Seconds from what player should start
     private var startSeconds: Double = 0.0
     
@@ -54,7 +44,7 @@ class AudioPlayerNode: AVAudioPlayerNode{
         self.startSeconds = startComponents.returnSeconds()
         let position = AVAudioFramePosition(self.startSeconds * self.outputFormat(forBus: 0).sampleRate)
         self.scheduleSegment(file, startingFrame: position, frameCount: file.returnRemainingDuration(currentPosition: position), at: nil, completionHandler: nil)
-        
+
         super.play()
     }
     

@@ -8,66 +8,31 @@
 import Foundation
 import UIKit
 
-class RecordViewController: UIViewController, KeyboardDelegate{
-    var extendedByKeyboard: Bool = false
-    
-    ///Action, or animation when keyboard changes it's state
-    func willChangeState(keyboardHeight: CGFloat, keyboardAnimationDuration: Double, state: KeyboardManager.State) {
-        let nameFieldMaxY = self.recorderBackground.convert(CGPoint(x: 0, y: self.recorderBackground.nameField.frame.maxY), to: self.view).y
-        let keyboardMinY = UIScreen.main.bounds.height - keyboardHeight
-        if nameFieldMaxY > keyboardMinY || (extendedByKeyboard && state == .hidden){
-            extendedByKeyboard = extendedByKeyboard ? false : true
-            
-            let difference = nameFieldMaxY - keyboardMinY + 20
-            recorderBackgroundTopConstraint.constant = state == KeyboardManager.State.showed ? topRecordBackgroundConstant - difference : topRecordBackgroundConstant
-            UIView.animate(withDuration: keyboardAnimationDuration) {
-                self.view.layoutIfNeeded()
-            }
-        }
-    }
-    
+class RecordViewController: UIViewController{
     
     var recorder = Recorder()
-    var voiceSound: VoiceSound!
+    lazy var voiceSound: VoiceSound = {
+        let voiceSound = VoiceSound()
+        voiceSound.name = "Example"
+        return voiceSound
+    }()
     var delegate: RecordViewControllerDelegate?
     
     ///Returns the recorder  view with audio wave and record button
-    lazy var recorderBackground: RecorderView = {
-        let view = RecorderView(voiceSound: self.voiceSound)
-        view.frame.size = UIScreen.main.bounds.size
+    override func loadView() {
+        self.view = RecorderView(voiceSound: self.voiceSound)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
-        view.layer.cornerRadius = 45
-        view.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
-        view.heightAnchor.constraint(equalToConstant: view.frame.height).isActive = true
-        return view
-    }()
-    private var topRecordBackgroundConstant: CGFloat = 50
-    private var recorderBackgroundTopConstraint: NSLayoutConstraint!
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.tag = 1
-        voiceSound = VoiceSound()
-        voiceSound.name = "Example"
+        
         recorder.delegate = self
         
-        self.view.backgroundColor = UIColor.black.withAlphaComponent(0.4)
-        
-        self.view.addSubview(recorderBackground)
+        (self.view as? RecorderView)?.delegate = self
         self.view.layoutIfNeeded()
         
-        let realSizeOfView = recorderBackground.recordButton.frame.maxY + 20
-        topRecordBackgroundConstant = -realSizeOfView
-        
-        recorderBackground.delegate = self
-        
-        recorderBackground.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        recorderBackground.topAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -realSizeOfView).isActive = true
-        recorderBackgroundTopConstraint = recorderBackground.topAnchor.constraint(equalTo: self.view.bottomAnchor, constant: topRecordBackgroundConstant)
-        recorderBackgroundTopConstraint.isActive = true
-        
-        KeyboardManager.shared.delegate = self
         recorder.recordTimer.delegate = self
     }
     
@@ -85,32 +50,19 @@ class RecordViewController: UIViewController, KeyboardDelegate{
         }
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else{
-            return
-        }
-        let view = self.view.hitTest(touch.location(in: self.view), with: nil)
-        if view?.tag == 1{
-            if KeyboardManager.shared.state == KeyboardManager.State.showed{
-                self.view.endEditing(true)
-            }
-            else{
-                self.dismiss(animated: true, completion: nil)
-            }
-            
-        }
-        
-    }
 }
 
 extension RecordViewController: RecorderDelegate{
     func didStartRecording() {
-        
+        DispatchQueue.main.async {
+            (self.view as? RecorderView)?.changeStateOfRecordButton(isPlaying: true)
+        }
     }
     
     func didStopRecording() {
         DispatchQueue.main.async{
-            self.dismiss(animated: true, completion: nil)
+            (self.view as? RecorderView)?.changeStateOfRecordButton(isPlaying: false)
+            self.parent?.dismiss(animated: true, completion: nil)
         }
     }
 }
@@ -133,8 +85,8 @@ extension RecordViewController: RecorderViewDelegate{
 extension RecordViewController: CustomTimerDelegate{
     func timerBlock(timer: CustomTimer) {
         DispatchQueue.main.async {
-            self.recorderBackground.timerLabel.updateText(from: timer.timeComponents)
-            self.recorderBackground.audioWave.update(timer: timer, recorder: self.recorder)
+            (self.view as? RecorderView)?.timerLabel.updateText(from: timer.timeComponents)
+            (self.view as? RecorderView)?.audioWave.update(timer: timer, recorder: self.recorder)
         }
     }
 }

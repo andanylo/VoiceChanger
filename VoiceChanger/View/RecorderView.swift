@@ -46,14 +46,23 @@ class RecorderView: UIView{
     lazy var recordButton: UIButton = {
         let button = UIButton(type: .system)
         button.frame = CGRect(x: 0, y: 0, width: 73, height: 73)
-        button.backgroundColor = UIColor(red: 221 / 255, green: 0, blue: 0, alpha: 1)
-        button.layer.cornerRadius = button.frame.width / 2
         button.addTarget(self, action: #selector(didClickRecordButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.widthAnchor.constraint(equalToConstant: button.frame.width).isActive = true
         button.heightAnchor.constraint(equalToConstant: button.frame.height).isActive = true
         return button
     }()
+    
+    func changeStateOfRecordButton(isPlaying: Bool){
+        if isPlaying{
+            recordButton.layer.cornerRadius = 20
+            recordButton.backgroundColor = UIColor(red: 0.5, green: 0, blue: 0, alpha: 1)
+        }
+        else{
+            recordButton.layer.cornerRadius = recordButton.frame.width / 2
+            recordButton.backgroundColor = UIColor(red: 221 / 255, green: 0, blue: 0, alpha: 1)
+        }
+    }
     
     var delegate: RecorderViewDelegate?
     
@@ -93,6 +102,8 @@ class RecorderView: UIView{
         
         recordButton.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 20).isActive = true
         recordButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        
+        changeStateOfRecordButton(isPlaying: false)
     }
     required init?(coder: NSCoder) {
         super.init(coder: coder)

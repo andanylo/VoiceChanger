@@ -14,7 +14,7 @@ class Player{
     static var shared = Player()
     
     ///Class that has all audio nodes
-    struct AudioNodes{
+    class AudioNodes{
         var audioEngine: AudioEngine
         var audioPlayer: AudioPlayerNode
         var pitchAndSpeedNode: AVAudioUnitTimePitch
@@ -28,9 +28,16 @@ class Player{
             self.pitchAndSpeedNode.pitch = soundEffects.pitch
             self.distortionNode.wetDryMix = soundEffects.distortion
             self.reverbNode.wetDryMix = soundEffects.reverb
-            self.reverbNode.loadFactoryPreset(.cathedral)
+            self.distortionNode.loadFactoryPreset(soundEffects.distortionPreset)
+            self.reverbNode.loadFactoryPreset(soundEffects.reverbPreset)
         }
-        
+        init(audioEngine: AudioEngine, audioPlayer: AudioPlayerNode, pitchAndSpeedNode: AVAudioUnitTimePitch, distortionNode: AVAudioUnitDistortion, reverbNode: AVAudioUnitReverb) {
+            self.audioEngine = audioEngine
+            self.audioPlayer = audioPlayer
+            self.pitchAndSpeedNode = pitchAndSpeedNode
+            self.distortionNode = distortionNode
+            self.reverbNode = reverbNode
+        }
     }
     
     
@@ -59,10 +66,11 @@ class Player{
             guard let file = voiceSound.audioFile else{
                 throw PlayingError.cantFindFile
             }
+
+            
             if self.audioNodes.audioPlayer.file != voiceSound.audioFile{
                 
                 self.audioNodes.audioPlayer.file = voiceSound.audioFile
-                self.audioNodes.setEffects(effects: voiceSound.effects)
                 
                 self.audioNodes.audioEngine.attachAndConnect([
                     self.audioNodes.audioPlayer,
@@ -77,6 +85,7 @@ class Player{
                 }
     
             }
+            self.audioNodes.setEffects(effects: voiceSound.effects)
             try self.audioNodes.audioPlayer.play(from: time)
             
             self.currentVoiceSound = voiceSound
@@ -103,14 +112,19 @@ class Player{
         currentVoiceSound?.playerState.reset()
         
         delegate?.didPlayerStopPlaying()
-        
-        currentVoiceSound = nil
+        if !isPausing{
+            currentVoiceSound = nil
+        }
     }
     
     ///Stops the audioPlayer
     func stopPlaying(isPausing: Bool){
-        self.audioNodes.audioPlayer.stop()
-        didStop(isPausing: isPausing)
+        if Player.shared.audioNodes.audioEngine.isRunning{
+            if currentVoiceSound?.playerState.isPlaying == true{
+                self.audioNodes.audioPlayer.stop()
+            }
+            didStop(isPausing: isPausing)
+        }
     }
     
     ///Set avaudio session playback
@@ -129,14 +143,23 @@ class Player{
     enum PlayingError: Error{
         case cantFindFile
     }
+    
+    private var previousValue: Double = 0.0
 }
 extension Player: CustomTimerDelegate{
     ///Stop the player if current time is greater than duration
     func timerBlock(timer: CustomTimer) {
-        if self.audioNodes.audioPlayer.currentTime >= self.audioNodes.audioPlayer.duration{
-            stopPlaying(isPausing: false)
+        if self.audioNodes.audioEngine.isRunning {
+            let currentTime = self.audioNodes.audioPlayer.currentTime
+            if currentTime != previousValue && currentTime >= 0{
+                if currentTime >= self.currentVoiceSound?.duration.returnSeconds() ?? 0.0{
+                    stopPlaying(isPausing: false)
+                }
+                
+                delegate?.didUpdateCurrentTime(currentTime: TimeComponents(seconds: currentTime))
+                previousValue = currentTime
+            }
         }
-        delegate?.didUpdateTimer(timer: timer)
     }
 }
 
@@ -153,5 +176,5 @@ extension Player.PlayingError: LocalizedError{
 protocol PlayerDelegate{
     func didPlayerStopPlaying()
     func didPlayerStartPlaying()
-    func didUpdateTimer(timer: CustomTimer)
+    func didUpdateCurrentTime(currentTime: TimeComponents)
 }

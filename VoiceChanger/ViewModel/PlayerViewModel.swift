@@ -11,9 +11,13 @@ class PlayerViewModel{
     
     var onPlayStateChange: ((Bool) -> Void)?
     
-    var onPlayerTimerChange: ((CustomTimer) -> Void)?
+    var onPlayerCurrentTimeChange: ((TimeComponents) -> Void)?
     
     var onSliderComponentChange: (() -> Void)?
+    
+    var onClickOptionsButton: (() -> Void)?
+    
+    var onEffectCreate: (() -> Void)?
     
     ///Method that handles whenever the
     func didClickOnPlayButton(){
@@ -52,6 +56,8 @@ class PlayerViewModel{
             updateSliderComponents(seconds: max(sliderSeconds - 5, 0))
         }
     }
+    
+
     
     ///Method that gets called after slider has changed it's value
     func didChangeTheValueOfSlider(value: Float){
@@ -95,5 +101,17 @@ class PlayerViewModel{
     init(voiceSound: VoiceSound){
         self.voiceSound = voiceSound
         self.remainingComponents = voiceSound.duration
+    }
+}
+
+///Inherit from protocol
+extension PlayerViewModel: EffectsPickerDelegate{
+    func didClickOnCreate() {
+        onEffectCreate?()
+    }
+    
+    ///Did pick effects
+    func didPick(effects: Effects) {
+        self.voiceSound?.effects = effects
     }
 }

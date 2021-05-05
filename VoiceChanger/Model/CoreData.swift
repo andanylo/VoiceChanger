@@ -93,10 +93,31 @@ class CoreData{
                 let voiceSound = VoiceSound(entity: entity)
                 voiceSounds.append(voiceSound)
             }
+            
+            removeNotSavedFiles(voiceRecords: voiceSounds)
+            
             return voiceSounds
         }
         catch{
             throw error
+        }
+    }
+    
+    ///remove files, which are not saved
+    func removeNotSavedFiles(voiceRecords: [VoiceSound]){
+        do{
+            guard let recordsDirectory = DirectoryManager.shared.returnRecordsDirectory() else{
+                return
+            }
+            let recordFiles = try FileManager.default.contentsOfDirectory(atPath: recordsDirectory.path)
+            try recordFiles.forEach({ file in
+                if !voiceRecords.contains(where: {$0.url?.lastPathComponent == file}){
+                   try FileManager.default.removeItem(atPath: recordsDirectory.appendingPathComponent(file).path)
+                }
+            })
+        }
+        catch{
+        
         }
     }
     

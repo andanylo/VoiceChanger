@@ -46,8 +46,10 @@ class CustomTimer{
     
     ///Pauses the timer
     func pause(){
-        timer?.invalidate()
-        isRunning = false
+        DispatchQueue.main.async{
+            self.timer?.invalidate()
+            self.isRunning = false
+        }
     }
     
     ///Resets the timer
