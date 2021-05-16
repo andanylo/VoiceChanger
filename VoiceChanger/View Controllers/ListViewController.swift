@@ -139,16 +139,51 @@ class ListViewController: UIViewController {
     func presentOptions(voiceSound: VoiceSound){
         let options = UIAlertController(title: voiceSound.name, message: nil, preferredStyle: .actionSheet)
         options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
-            
+            do{
+                let loadingViewController = LoadingViewController()
+                loadingViewController.modalPresentationStyle = .overCurrentContext
+                loadingViewController.transitioningDelegate = self
+                Animator.shared.duration = 0.4
+                self.present(loadingViewController, animated: true, completion: nil)
+                
+                try FileExporter.shared.exportFile(voiceSound: voiceSound, completion: { url in
+                    DispatchQueue.main.async {
+                        let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                        activity.completionWithItemsHandler = { _, completed, _, _ in
+                            DispatchQueue.main.async{
+                                loadingViewController.loadingViewModel.state = completed ? .loadedSuccessfully : .error
+                                Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { _ in
+                                    loadingViewController.dismiss(animated: true, completion: nil)
+                                }
+                            }
+                            try? FileManager.default.removeItem(at: url)
+                        }
+                        loadingViewController.present(activity, animated: true, completion: nil)
+                    }
+                })
+                
+            }
+            catch{
+                print(error.localizedDescription)
+            }
         }))
         options.addAction(UIAlertAction(title: "Rename", style: .default, handler: { (_) in
             DispatchQueue.main.async {
                 let renameAlert = UIAlertController(title: "Rename sound", message: "Enter the new name below", preferredStyle: .alert)
+                var alertTextField: UITextField?
                 renameAlert.addTextField { textField in
-                    
+                    alertTextField = textField
                 }
                 renameAlert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
-                    
+                    DispatchQueue.main.async {
+                        if let newName = alertTextField?.text{
+                            voiceSound.name = newName
+                            guard let index = self.voiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: Int(index), section: 0)) as? VoiceSoundCell else{
+                                return
+                            }
+                            cell.changeName(newName: newName)
+                        }
+                    }
                 }))
                 renameAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
                 self.present(renameAlert, animated: true, completion: nil)

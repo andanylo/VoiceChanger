@@ -11,8 +11,21 @@ import UIKit
 ///Class that represent the effect templates picker
 class EffectsPicker: UIView{
     private let effects = [
-        Effects(speed: 1, pitch: 0, distortion: 0, reverb: 30),
+        ///Normal
+        Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        ///Drunk
+        Effects(speed: 0.6, pitch: -100, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        ///Robot
+        Effects(speed: 1, pitch: -400, distortion: 10, reverb: 0, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        ///small robot
+        Effects(speed: 1, pitch: 400, distortion: 10, reverb: 0, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        //Bee
+        Effects(speed: 1.5, pitch: 1000, distortion: 5, reverb: 0, distortionPreset: .speechWaves, reverbPreset: nil),
+        ///alien
+        Effects(speed: 1, pitch: 200, distortion: 10, reverb: 0, distortionPreset: .speechCosmicInterference, reverbPreset: nil),
         
+        ///Canyon
+        Effects(speed: 1, pitch: 0, distortion: 100, reverb: 5, distortionPreset: .multiEcho2, reverbPreset: .cathedral)
     ]
     
     var effectsTemplateViewModels = [EffectTemplateViewModel]()
@@ -27,7 +40,14 @@ class EffectsPicker: UIView{
         }
     }
     
-    weak var delegate: EffectsPickerDelegate?
+    weak var delegate: EffectsPickerDelegate?{
+        didSet{
+            guard let effects = selectedEffectsTemplate?.effects else{
+                return
+            }
+            delegate?.didPick(effects: effects)
+        }
+    }
     
     ///Collection view to display templates
     lazy var collectionView: UICollectionView = {

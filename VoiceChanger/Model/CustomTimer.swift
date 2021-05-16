@@ -24,7 +24,7 @@ class CustomTimer{
     
     var timeComponents: TimeComponents = TimeComponents()
     
-    var delegate: CustomTimerDelegate?
+    weak var delegate: CustomTimerDelegate?
     
     var timeInterval = 0.0
     init(timeInterval: TimeInterval){
@@ -39,17 +39,19 @@ class CustomTimer{
                 self.currTime += 1
                 self.delegate?.timerBlock(timer: self)
             })
+            RunLoop.current.add(self.timer!, forMode: .common)
             self.isRunning = true
+            
         }
         
     }
     
     ///Pauses the timer
     func pause(){
-        DispatchQueue.main.async{
+        if timer != nil{
             self.timer?.invalidate()
-            self.isRunning = false
         }
+        self.isRunning = false
     }
     
     ///Resets the timer
@@ -65,6 +67,6 @@ class CustomTimer{
     }
 }
 
-protocol CustomTimerDelegate{
+protocol CustomTimerDelegate: AnyObject{
     func timerBlock(timer: CustomTimer)
 }

@@ -113,5 +113,6 @@ extension PlayerViewModel: EffectsPickerDelegate{
     ///Did pick effects
     func didPick(effects: Effects) {
         self.voiceSound?.effects = effects
+        Player.shared.audioNodes.setEffects(effects: effects)
     }
 }

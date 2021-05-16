@@ -8,42 +8,63 @@
 import Foundation
 import AVFoundation
 
+///Class that has all audio nodes
+class AudioNodes{
+    var audioEngine: AudioEngine
+    var audioPlayer: AudioPlayerNode
+    var pitchAndSpeedNode: AVAudioUnitTimePitch
+    var distortionNode: AVAudioUnitDistortion
+    var reverbNode: AVAudioUnitReverb
+
+    func setEffects(effects: Effects?){
+        let soundEffects = effects ?? Effects()
+        
+        self.pitchAndSpeedNode.rate = soundEffects.speed
+        self.pitchAndSpeedNode.pitch = soundEffects.pitch
+
+        if soundEffects.distortionPreset != nil{
+            self.distortionNode.loadFactoryPreset(soundEffects.distortionPreset!)
+        }
+        if soundEffects.reverbPreset != nil{
+            self.reverbNode.loadFactoryPreset(soundEffects.reverbPreset!)
+        }
+        self.distortionNode.wetDryMix = soundEffects.distortion
+        self.reverbNode.wetDryMix = soundEffects.reverb
+    }
+    init(audioEngine: AudioEngine, audioPlayer: AudioPlayerNode, pitchAndSpeedNode: AVAudioUnitTimePitch, distortionNode: AVAudioUnitDistortion, reverbNode: AVAudioUnitReverb) {
+        self.audioEngine = audioEngine
+        self.audioPlayer = audioPlayer
+        self.pitchAndSpeedNode = pitchAndSpeedNode
+        self.distortionNode = distortionNode
+        self.reverbNode = reverbNode
+    }
+    func setUp(voiceSound: VoiceSound) throws{
+        guard let file = voiceSound.audioFile else{
+            throw PlayingError.cantFindFile
+        }
+        
+        if audioPlayer.file != file{
+            
+            audioPlayer.file = file
+            
+            audioEngine.attachAndConnect([
+                audioPlayer,
+                pitchAndSpeedNode,
+                distortionNode,
+                reverbNode
+            ], format: file.processingFormat)
+        }
+        setEffects(effects: voiceSound.effects)
+    }
+}
 
 ///Class that plays an audio file with effects
 class Player{
     static var shared = Player()
     
-    ///Class that has all audio nodes
-    class AudioNodes{
-        var audioEngine: AudioEngine
-        var audioPlayer: AudioPlayerNode
-        var pitchAndSpeedNode: AVAudioUnitTimePitch
-        var distortionNode: AVAudioUnitDistortion
-        var reverbNode: AVAudioUnitReverb
-
-        func setEffects(effects: Effects?){
-            let soundEffects = effects ?? Effects()
-            
-            self.pitchAndSpeedNode.rate = soundEffects.speed
-            self.pitchAndSpeedNode.pitch = soundEffects.pitch
-            self.distortionNode.wetDryMix = soundEffects.distortion
-            self.reverbNode.wetDryMix = soundEffects.reverb
-            self.distortionNode.loadFactoryPreset(soundEffects.distortionPreset)
-            self.reverbNode.loadFactoryPreset(soundEffects.reverbPreset)
-        }
-        init(audioEngine: AudioEngine, audioPlayer: AudioPlayerNode, pitchAndSpeedNode: AVAudioUnitTimePitch, distortionNode: AVAudioUnitDistortion, reverbNode: AVAudioUnitReverb) {
-            self.audioEngine = audioEngine
-            self.audioPlayer = audioPlayer
-            self.pitchAndSpeedNode = pitchAndSpeedNode
-            self.distortionNode = distortionNode
-            self.reverbNode = reverbNode
-        }
-    }
-    
-    
     var audioNodes: AudioNodes!
     
-    var delegate: PlayerDelegate?
+    weak var delegate: PlayerDelegate?
     
     var currentVoiceSound: VoiceSound?
     
@@ -57,35 +78,20 @@ class Player{
 
     
     
+    
     ///Play an audio file from voice sound class
     func playFile(voiceSound: VoiceSound, at time: TimeComponents) throws{
         do{
             
             Player.shared.setPlayback()
-            
-            guard let file = voiceSound.audioFile else{
-                throw PlayingError.cantFindFile
-            }
 
+            try self.audioNodes.setUp(voiceSound: voiceSound)
             
-            if self.audioNodes.audioPlayer.file != voiceSound.audioFile{
-                
-                self.audioNodes.audioPlayer.file = voiceSound.audioFile
-                
-                self.audioNodes.audioEngine.attachAndConnect([
-                    self.audioNodes.audioPlayer,
-                    self.audioNodes.pitchAndSpeedNode,
-                    self.audioNodes.distortionNode,
-                    self.audioNodes.reverbNode
-                ], format: file.processingFormat)
-                
-                if !self.audioNodes.audioEngine.isRunning{
-                    self.audioNodes.audioEngine.prepare()
-                    try self.audioNodes.audioEngine.start()
-                }
-    
+            if !self.audioNodes.audioEngine.isRunning{
+                self.audioNodes.audioEngine.prepare()
+                try self.audioNodes.audioEngine.start()
             }
-            self.audioNodes.setEffects(effects: voiceSound.effects)
+            
             try self.audioNodes.audioPlayer.play(from: time)
             
             self.currentVoiceSound = voiceSound
@@ -103,12 +109,13 @@ class Player{
     
     ///Method that executes after the player stopped playing
     private func didStop(isPausing: Bool){
-
-        playerTimer.pause()
-        
         if !isPausing{
             playerTimer.reset()
         }
+        else{
+            playerTimer.pause()
+        }
+        
         currentVoiceSound?.playerState.reset()
         
         delegate?.didPlayerStopPlaying()
@@ -140,10 +147,6 @@ class Player{
         }
     }
     
-    enum PlayingError: Error{
-        case cantFindFile
-    }
-    
     private var previousValue: Double = 0.0
 }
 extension Player: CustomTimerDelegate{
@@ -163,7 +166,7 @@ extension Player: CustomTimerDelegate{
     }
 }
 
-extension Player.PlayingError: LocalizedError{
+extension PlayingError: LocalizedError{
     var errorDescription: String?{
         get{
             switch self {
@@ -173,8 +176,11 @@ extension Player.PlayingError: LocalizedError{
         }
     }
 }
-protocol PlayerDelegate{
+protocol PlayerDelegate: AnyObject{
     func didPlayerStopPlaying()
     func didPlayerStartPlaying()
     func didUpdateCurrentTime(currentTime: TimeComponents)
+}
+enum PlayingError: Error{
+    case cantFindFile
 }

@@ -64,7 +64,7 @@ class RecorderView: UIView{
         }
     }
     
-    var delegate: RecorderViewDelegate?
+    weak var delegate: RecorderViewDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -125,6 +125,6 @@ extension RecorderView: UITextFieldDelegate{
     }
 }
 
-protocol RecorderViewDelegate{
+protocol RecorderViewDelegate: AnyObject{
     func didClickRecordButton()
 }

@@ -16,15 +16,21 @@ class Effects: NSObject{
     var reverb: Float = 0.0
     
     ///Presets for default effects
-    var distortionPreset: AVAudioUnitDistortionPreset = .drumsBitBrush
-    var reverbPreset: AVAudioUnitReverbPreset = .mediumHall
+    var distortionPreset: AVAudioUnitDistortionPreset?
+    var reverbPreset: AVAudioUnitReverbPreset?
     
     ///Initialize the structure with parameters
-    init(speed: Float, pitch: Float, distortion: Float, reverb: Float){
+    init(speed: Float, pitch: Float, distortion: Float, reverb: Float, distortionPreset: AVAudioUnitDistortionPreset?, reverbPreset: AVAudioUnitReverbPreset?){
         self.speed = speed
         self.pitch = pitch
         self.distortion = distortion
         self.reverb = reverb
+        
+        self.distortionPreset = distortionPreset
+        
+
+        self.reverbPreset = reverbPreset
+
     }
     
     ///Initialize from an entity

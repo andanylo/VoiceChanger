@@ -13,7 +13,7 @@ class KeyboardManager{
     
     static var shared = KeyboardManager()
     
-    var delegate: KeyboardDelegate?
+    weak var delegate: KeyboardDelegate?
     
     var keyboardHeight: CGFloat = 0.0
     var keyboardAnimationDuration: Double = 0.0
@@ -51,7 +51,7 @@ class KeyboardManager{
         case none
     }
 }
-protocol KeyboardDelegate{
+protocol KeyboardDelegate: AnyObject{
     var extendedByKeyboard: Bool{
         get set
     }

@@ -10,19 +10,19 @@ import UIKit
 
 
 class EffectTemplateCell: UICollectionViewCell{
-    var effectTemplateViewModel: EffectTemplateViewModel!
+    var effectTemplateViewModel: EffectTemplateViewModel?
     
     private var addImage: UIButton?
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        effectTemplateViewModel.didSelect = nil
+        effectTemplateViewModel?.didSelect = nil
         addImage?.removeFromSuperview()
         addImage = nil
     }
     func start(effectTemplateViewModel: EffectTemplateViewModel){
         self.contentView.layer.cornerRadius = self.contentView.frame.width / 2
-        
+        self.effectTemplateViewModel = effectTemplateViewModel
         if effectTemplateViewModel.type == .template{
             self.contentView.layer.shadowPath = UIBezierPath(roundedRect: self.contentView.bounds, cornerRadius: self.contentView.layer.cornerRadius).cgPath
             self.contentView.layer.shadowRadius = 3

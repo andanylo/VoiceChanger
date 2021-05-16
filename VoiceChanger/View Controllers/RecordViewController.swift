@@ -16,7 +16,7 @@ class RecordViewController: UIViewController{
         voiceSound.name = "Example"
         return voiceSound
     }()
-    var delegate: RecordViewControllerDelegate?
+    weak var delegate: RecordViewControllerDelegate?
     
     ///Returns the recorder  view with audio wave and record button
     override func loadView() {
@@ -91,6 +91,6 @@ extension RecordViewController: CustomTimerDelegate{
     }
 }
 
-protocol RecordViewControllerDelegate{
+protocol RecordViewControllerDelegate: AnyObject{
     func willSave(voiceSound: VoiceSound)
 }

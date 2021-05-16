@@ -76,6 +76,10 @@ class VoiceSoundCell: UICollectionViewCell{
         }
     }
     
+    ///Method to change the nameLabel text
+    func changeName(newName: String){
+        nameLabel.text = newName
+    }
     
     ///Label that displays the length of audio file
     private lazy var audioFileDurationLabel: TimerLabel = {

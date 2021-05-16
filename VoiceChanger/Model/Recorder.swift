@@ -34,7 +34,7 @@ class Recorder{
     
     
     ///Standard settings for recording giles
-    private let settings = [AVFormatIDKey: Int(kAudioFormatLinearPCM), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
+    static let settings = [AVFormatIDKey: Int(kAudioFormatLinearPCM), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
     
     private var audioRecorder: AVAudioRecorder!
     
@@ -52,7 +52,7 @@ class Recorder{
     }
     
     ///Delegate for recorder
-    var delegate: RecorderDelegate?
+    weak var delegate: RecorderDelegate?
     
     
     ///Voice sound to record
@@ -101,7 +101,7 @@ class Recorder{
                 throw RecordingError.unknownURL
             }
 
-            self.audioRecorder = try AVAudioRecorder(url: recordURL, settings: self.settings)
+            self.audioRecorder = try AVAudioRecorder(url: recordURL, settings: Recorder.settings)
             
             self.audioRecorder.prepareToRecord()
             self.audioRecorder.record()
@@ -163,7 +163,7 @@ extension Recorder.RecordingError: LocalizedError{
         }
     }
 }
-protocol RecorderDelegate{
+protocol RecorderDelegate: AnyObject{
     func didStartRecording()
     func didStopRecording()
 }

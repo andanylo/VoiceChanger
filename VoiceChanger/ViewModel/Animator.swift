@@ -28,18 +28,20 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
         toView.layoutIfNeeded()
         transitionContext.containerView.addSubview(toView)
         
+        
+        let backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0 : 0.4)
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        
+        transitionContext.containerView.addSubview(backgroundView)
+        
+        backgroundView.leadingAnchor.constraint(equalTo: transitionContext.containerView.leadingAnchor).isActive = true
+        backgroundView.topAnchor.constraint(equalTo: transitionContext.containerView.topAnchor).isActive = true
+        backgroundView.bottomAnchor.constraint(equalTo: transitionContext.containerView.bottomAnchor).isActive = true
+        backgroundView.trailingAnchor.constraint(equalTo: transitionContext.containerView.trailingAnchor).isActive = true
+        
+        
         if firstController is ListViewController, let popUpViewController = secondController as? PopUpController{
-            let backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
-            backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0 : 0.4)
-            backgroundView.translatesAutoresizingMaskIntoConstraints = false
-            
-            transitionContext.containerView.addSubview(backgroundView)
-            
-            backgroundView.leadingAnchor.constraint(equalTo: transitionContext.containerView.leadingAnchor).isActive = true
-            backgroundView.topAnchor.constraint(equalTo: transitionContext.containerView.topAnchor).isActive = true
-            backgroundView.bottomAnchor.constraint(equalTo: transitionContext.containerView.bottomAnchor).isActive = true
-            backgroundView.trailingAnchor.constraint(equalTo: transitionContext.containerView.trailingAnchor).isActive = true
-            
             guard let recordView = popUpViewController.mainView.snapshotView(afterScreenUpdates: true) else{
                 transitionContext.completeTransition(true)
                 return
@@ -61,7 +63,34 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
                 [backgroundView, recordView].forEach({$0.removeFromSuperview()})
                 transitionContext.completeTransition(true)
             })
-           
+        }
+        else if firstController is ListViewController, let loadingViewController = secondController as? LoadingViewController{
+            
+            let loadView = LoadingView(frame: loadingViewController.loadingView.frame)
+            loadView.translatesAutoresizingMaskIntoConstraints = true
+            loadView.backgroundColor = .white
+            transitionContext.containerView.addSubview(loadView)
+            
+            loadView.loadingViewModel = LoadingViewModel()
+            loadView.loadingViewModel.state = loadingViewController.loadingViewModel.state
+            
+            
+            loadView.frame = loadingViewController.loadingView.frame
+            
+            let scale: CGFloat = presenting ? 1.1 : 1
+            loadView.transform = CGAffineTransform(scaleX: scale, y: scale)
+            loadView.alpha = presenting ? 0 : 1
+            
+            let newScale: CGFloat = presenting ? 1 : 1.1
+            UIView.animate(withDuration: duration, delay: 0, options: []) {
+                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self.presenting ? 0.4 : 0)
+                loadView.transform = CGAffineTransform(scaleX: newScale, y: newScale)
+                loadView.alpha = self.presenting ? 1 : 0
+            } completion: { _ in
+                toView.isHidden = false
+                [backgroundView, loadView].forEach({$0.removeFromSuperview()})
+                transitionContext.completeTransition(true)
+            }
 
         }
     }
