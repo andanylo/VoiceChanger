@@ -22,6 +22,8 @@ class AudioNodes{
         self.pitchAndSpeedNode.rate = soundEffects.speed
         self.pitchAndSpeedNode.pitch = soundEffects.pitch
 
+        
+        
         if soundEffects.distortionPreset != nil{
             self.distortionNode.loadFactoryPreset(soundEffects.distortionPreset!)
         }
@@ -126,6 +128,7 @@ class Player{
     
     ///Stops the audioPlayer
     func stopPlaying(isPausing: Bool){
+        
         if Player.shared.audioNodes.audioEngine.isRunning{
             if currentVoiceSound?.playerState.isPlaying == true{
                 self.audioNodes.audioPlayer.stop()
@@ -152,17 +155,19 @@ class Player{
 extension Player: CustomTimerDelegate{
     ///Stop the player if current time is greater than duration
     func timerBlock(timer: CustomTimer) {
+        
         if self.audioNodes.audioEngine.isRunning {
             let currentTime = self.audioNodes.audioPlayer.currentTime
-            if currentTime != previousValue && currentTime >= 0{
+            if currentTime != self.previousValue && currentTime >= 0{
                 if currentTime >= self.currentVoiceSound?.duration.returnSeconds() ?? 0.0{
-                    stopPlaying(isPausing: false)
+                    self.stopPlaying(isPausing: false)
                 }
                 
-                delegate?.didUpdateCurrentTime(currentTime: TimeComponents(seconds: currentTime))
-                previousValue = currentTime
+                self.delegate?.didUpdateCurrentTime(currentTime: TimeComponents(seconds: currentTime))
+                self.previousValue = currentTime
             }
         }
+        
     }
 }
 

@@ -10,4 +10,6 @@ class Variables{
     static let shared = Variables()
     
     var recordList: RecordList = RecordList()
+    
+    var currentDeviceTheme: DeviceTheme = .normal
 }

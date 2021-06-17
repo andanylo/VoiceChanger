@@ -66,9 +66,9 @@ class VoiceSoundCell: UICollectionViewCell{
             disclosureIndicator.transform = CGAffineTransform(rotationAngle: rotationAngle)
             voiceSoundCellModel?.didSelect = { selected in
                 rotationAngle = selected == true ? CGFloat.pi / 2 : 0
-                
-                Player.shared.stopPlaying(isPausing: false)
-                
+                if Player.shared.currentVoiceSound?.playerState.isPlaying == true{
+                    Player.shared.stopPlaying(isPausing: false)
+                }
                 UIView.animate(withDuration: 0.2) {
                     self.disclosureIndicator.transform = CGAffineTransform(rotationAngle: rotationAngle)
                 }
@@ -123,7 +123,7 @@ class VoiceSoundCell: UICollectionViewCell{
         
         self.layer.cornerRadius = 10
         self.layer.shadowRadius = 3
-        self.layer.shadowOpacity = 0.5
+        self.layer.shadowOpacity = 0.3
         self.layer.shadowColor = UIColor.black.cgColor
         self.layer.shadowOffset = CGSize(width: 0, height: 2)
         self.layer.shouldRasterize = true

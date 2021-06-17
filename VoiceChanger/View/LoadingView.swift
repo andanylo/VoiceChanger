@@ -30,7 +30,7 @@ class LoadingView: UIView{
         return activity
     }()
     lazy var resultImageView: UIImageView = {
-        guard let image = UIImage(named: loadingViewModel.currentImageName ?? "dots") else{
+        guard let image = UIImage(named: loadingViewModel.currentImageName ?? "dots")?.withRenderingMode(.alwaysTemplate) else{
             return UIImageView()
         }
         let imageView = UIImageView()
@@ -75,6 +75,8 @@ class LoadingView: UIView{
             
             self.resultImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
             self.resultImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+            
+            self.resultImageView.tintColor = state == .error ? .red : UIColor(red: 0, green: 122/255, blue: 1, alpha: 1)
         }
     }
     

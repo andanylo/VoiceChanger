@@ -35,7 +35,7 @@ class ListViewController: UIViewController {
         navBar.isTranslucent = false
         navBar.sizeToFit()
         navBar.heightAnchor.constraint(equalToConstant: navBar.frame.height).isActive = true
-        let navItem = UINavigationItem(title: "Title")
+        let navItem = UINavigationItem(title: "")
         navBar.setItems([navItem], animated: false)
         navItem.setLeftBarButton(editButtonItem, animated: false)
         return navBar
@@ -136,6 +136,7 @@ class ListViewController: UIViewController {
         presentPopUp(type: .record, objectToTransfer: objectToTransfer)
     }
     
+    ///Options for the voice sound
     func presentOptions(voiceSound: VoiceSound){
         let options = UIAlertController(title: voiceSound.name, message: nil, preferredStyle: .actionSheet)
         options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
@@ -194,7 +195,19 @@ class ListViewController: UIViewController {
                 self.presentRecorder(objectToTransfer: voiceSound)
             }
         }))
+        
+        options.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            DispatchQueue.main.async {
+                guard let cellIndex = self.voiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: cellIndex, section: 0)) else {
+                    return
+                }
+                self.collectionViewDeleteAction(cell: cell)
+            }
+        }))
+        
         options.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        
         self.present(options, animated: true, completion: nil)
     }
 }
@@ -232,22 +245,32 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: self.view.frame.width - voiceSoundCellModels[indexPath.row].edges.left - voiceSoundCellModels[indexPath.row].edges.right, height: voiceSoundCellModels[indexPath.row].height)
     }
+    
+    ///Delete the cell with model and view model
     func collectionViewDeleteAction(cell: UICollectionViewCell?){
-        guard let cell = cell, let indexPath = collectionView.indexPath(for: cell) else{
-            return
-        }
-        do{
-            guard let url = Variables.shared.recordList.returnObject(at: indexPath.row)?.url else{
-                return
+        let alertController = UIAlertController(title: "Are you sure?", message: "You are about to delete this sound, deleted sounds will be gone forever!", preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            DispatchQueue.main.async {
+                Player.shared.stopPlaying(isPausing: false)
+                guard let cell = cell, let indexPath = self.collectionView.indexPath(for: cell) else{
+                    return
+                }
+                do{
+                    guard let url = Variables.shared.recordList.returnObject(at: indexPath.row)?.url else{
+                        return
+                    }
+                    try FileManager.default.removeItem(at: url)
+                }
+                catch{
+                    
+                }
+                Variables.shared.recordList.list.remove(at: indexPath.row)
+                self.voiceSoundCellModels.remove(at: indexPath.row)
+                self.collectionView.deleteItems(at: [indexPath])
             }
-            try FileManager.default.removeItem(at: url)
-        }
-        catch{
-            
-        }
-        Variables.shared.recordList.list.remove(at: indexPath.row)
-        self.voiceSoundCellModels.remove(at: indexPath.row)
-        self.collectionView.deleteItems(at: [indexPath])
+        }))
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.present(alertController, animated: true, completion: nil)
     }
 }
 

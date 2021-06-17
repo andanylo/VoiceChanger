@@ -23,9 +23,14 @@ class EffectsPicker: UIView{
         Effects(speed: 1.5, pitch: 1000, distortion: 5, reverb: 0, distortionPreset: .speechWaves, reverbPreset: nil),
         ///alien
         Effects(speed: 1, pitch: 200, distortion: 10, reverb: 0, distortionPreset: .speechCosmicInterference, reverbPreset: nil),
-        
         ///Canyon
-        Effects(speed: 1, pitch: 0, distortion: 100, reverb: 5, distortionPreset: .multiEcho2, reverbPreset: .cathedral)
+        Effects(speed: 1, pitch: 0, distortion: 100, reverb: 5, distortionPreset: .multiEcho2, reverbPreset: .cathedral),
+        ///Scary
+        Effects(speed: 0.8, pitch: -1000, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        ///Fast and helium
+        Effects(speed: 2, pitch: 2000, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        ///Slow
+        Effects(speed: 0.5, pitch: -2000, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil)
     ]
     
     var effectsTemplateViewModels = [EffectTemplateViewModel]()
