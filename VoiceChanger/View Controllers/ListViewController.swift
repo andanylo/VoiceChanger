@@ -34,11 +34,20 @@ class ListViewController: UIViewController {
         navBar.barStyle = .default
         navBar.isTranslucent = false
         navBar.sizeToFit()
-        navBar.heightAnchor.constraint(equalToConstant: navBar.frame.height).isActive = true
-        let navItem = UINavigationItem(title: "")
+        let navItem = UINavigationItem(title: "Voice records")
         navBar.setItems([navItem], animated: false)
-        navItem.setLeftBarButton(editButtonItem, animated: false)
+        navItem.searchController = searchController
+        navItem.setRightBarButton(editButtonItem, animated: false)
         return navBar
+    }()
+    
+    //Search controller
+    private lazy var searchController: UISearchController = {
+        let searchControl = UISearchController(searchResultsController: nil)
+        searchControl.delegate = self
+        searchControl.obscuresBackgroundDuringPresentation = false
+        searchControl.automaticallyShowsCancelButton = true
+        return searchControl
     }()
 
     ///Record button
@@ -56,7 +65,7 @@ class ListViewController: UIViewController {
         button.layer.shadowRadius = 3
         button.layer.shadowOpacity = 0.6
         button.addTarget(self, action: #selector(didClickOnRecord), for: .touchUpInside)
-        button.setImage(UIImage(named: "microphone"), for: .normal)
+        button.setImage(UIImage(named: "microphone")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         button.imageView?.contentMode = .scaleAspectFit
         return button
@@ -104,14 +113,20 @@ class ListViewController: UIViewController {
         recordButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20).isActive = true
         
         Player.shared.delegate = self
+        
+        self.view.layoutIfNeeded()
+        navigationBar.prefersLargeTitles = true
+        (navigationBar.items?.first)?.largeTitleDisplayMode = .automatic
+        (navigationBar.items?.first)?.hidesSearchBarWhenScrolling = true
+
     }
     
+    ///Layout the size of collection view cells
     override func viewDidLayoutSubviews() {
         guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
             return
         }
         collectionViewFlowLayout.invalidateLayout()
-        collectionViewFlowLayout.itemSize = CGSize(width: self.view.frame.width - 20, height: 70)
         collectionViewFlowLayout.minimumLineSpacing = 10
         collectionView.layoutIfNeeded()
     }
@@ -140,32 +155,35 @@ class ListViewController: UIViewController {
     func presentOptions(voiceSound: VoiceSound){
         let options = UIAlertController(title: voiceSound.name, message: nil, preferredStyle: .actionSheet)
         options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
-            do{
-                let loadingViewController = LoadingViewController()
-                loadingViewController.modalPresentationStyle = .overCurrentContext
-                loadingViewController.transitioningDelegate = self
-                Animator.shared.duration = 0.4
-                self.present(loadingViewController, animated: true, completion: nil)
-                
-                try FileExporter.shared.exportFile(voiceSound: voiceSound, completion: { url in
-                    DispatchQueue.main.async {
-                        let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-                        activity.completionWithItemsHandler = { _, completed, _, _ in
-                            DispatchQueue.main.async{
-                                loadingViewController.loadingViewModel.state = completed ? .loadedSuccessfully : .error
-                                Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { _ in
-                                    loadingViewController.dismiss(animated: true, completion: nil)
+            
+            let loadingViewController = LoadingViewController()
+            loadingViewController.modalPresentationStyle = .overCurrentContext
+            loadingViewController.transitioningDelegate = self
+            Animator.shared.duration = 0.4
+            self.present(loadingViewController, animated: true, completion: nil)
+            
+            DispatchQueue.global(qos: .background).async {
+                do{
+                    try FileExporter.shared.exportFile(voiceSound: voiceSound, completion: { url in
+                        DispatchQueue.main.async {
+                            let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                            activity.completionWithItemsHandler = { _, completed, _, _ in
+                                DispatchQueue.main.async{
+                                    loadingViewController.loadingViewModel.state = completed ? .loadedSuccessfully : .error
+                                    Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { _ in
+                                        loadingViewController.dismiss(animated: true, completion: nil)
+                                    }
                                 }
+                                try? FileManager.default.removeItem(at: url)
                             }
-                            try? FileManager.default.removeItem(at: url)
+                            loadingViewController.present(activity, animated: true, completion: nil)
                         }
-                        loadingViewController.present(activity, animated: true, completion: nil)
-                    }
-                })
-                
-            }
-            catch{
-                print(error.localizedDescription)
+                    })
+                    
+                }
+                catch{
+                    print(error.localizedDescription)
+                }
             }
         }))
         options.addAction(UIAlertAction(title: "Rename", style: .default, handler: { (_) in
@@ -210,6 +228,44 @@ class ListViewController: UIViewController {
         
         self.present(options, animated: true, completion: nil)
     }
+    
+    
+    ///Did change theme of the application
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        setTheme()
+    }
+    
+    ///Set theme for views
+    func setTheme(){
+        if #available(iOS 13.0, *) {
+            
+            if self.traitCollection.userInterfaceStyle == .dark{
+                Variables.shared.currentDeviceTheme = .dark
+            }
+            else{
+                Variables.shared.currentDeviceTheme = .normal
+            }
+            
+        } else {
+            Variables.shared.currentDeviceTheme = .normal
+        }
+        
+        collectionView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? UIColor(red: 242 / 255, green: 242 / 255, blue: 247 / 255, alpha: 1) : .init(white: 0.1, alpha: 1)
+        recordButton.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .black
+        recordButton.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        setTheme()
+    }
+    
+    
+
+}
+
+///Delegate for the search controller
+extension ListViewController: UISearchControllerDelegate{
+    
 }
 
 ///Collection view delegate and datasource

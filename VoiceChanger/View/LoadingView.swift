@@ -20,7 +20,7 @@ class LoadingView: UIView{
             }
         }
     }
-    
+    //Returns activity view
     lazy var activityView: UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView()
         activity.style = .medium
@@ -29,6 +29,8 @@ class LoadingView: UIView{
         activity.heightAnchor.constraint(equalToConstant: 20).isActive = true
         return activity
     }()
+    
+    //Returns the result image: checkmark (success); cross (failure)
     lazy var resultImageView: UIImageView = {
         guard let image = UIImage(named: loadingViewModel.currentImageName ?? "dots")?.withRenderingMode(.alwaysTemplate) else{
             return UIImageView()
@@ -55,6 +57,7 @@ class LoadingView: UIView{
         
     }
     
+    //Did change state of loading view
     func didChangeState(state: LoadingViewModel.LoadingState){
         switch state{
         
@@ -92,4 +95,11 @@ class LoadingView: UIView{
     }
     
     
+}
+
+//Inherit from device theme protocol
+extension LoadingView: ThemeColorChangable{
+    func didChangeTheme(newTheme: DeviceTheme) {
+        
+    }
 }

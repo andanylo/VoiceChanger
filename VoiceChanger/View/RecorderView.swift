@@ -128,3 +128,11 @@ extension RecorderView: UITextFieldDelegate{
 protocol RecorderViewDelegate: AnyObject{
     func didClickRecordButton()
 }
+
+
+//Inherit from device theme protocol
+extension RecorderView: ThemeColorChangable{
+    func didChangeTheme(newTheme: DeviceTheme) {
+        
+    }
+}

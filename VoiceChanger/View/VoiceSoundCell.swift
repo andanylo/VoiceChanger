@@ -192,3 +192,4 @@ class VoiceSoundCell: UICollectionViewCell{
         }
     }
 }
+

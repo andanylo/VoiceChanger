@@ -60,3 +60,11 @@ class EffectTemplateCell: UICollectionViewCell{
         }
     }
 }
+
+
+//Inherit from device theme protocol
+extension EffectTemplateCell: ThemeColorChangable{
+    func didChangeTheme(newTheme: DeviceTheme) {
+        
+    }
+}

@@ -17,6 +17,7 @@ class FileExporter{
     
     ///Creates and exports an audioFile with effects
     func exportFile(voiceSound: VoiceSound, completion: @escaping ((URL) -> Void)) throws{
+        
         //Set up effects and nodes
         try exportAudioNodes.setUp(voiceSound: voiceSound)
 
@@ -26,7 +27,6 @@ class FileExporter{
         
         //Schedule file
         self.exportAudioNodes.audioPlayer.scheduleFile(file, at: nil, completionHandler: nil)
-        
         //Enable manual rendering mode
         let maxNumberOfFrames: AVAudioFrameCount = 4096
         try exportAudioNodes.audioEngine.enableManualRenderingMode(.offline, format: file.processingFormat, maximumFrameCount: maxNumberOfFrames)
@@ -41,12 +41,14 @@ class FileExporter{
         
         let exportURL = cacheURL.appendingPathComponent(voiceSound.name + ".m4a")
         let newAudioFile = try AVAudioFile(forWriting: exportURL, settings: file.fileFormat.settings)
-        
+       
         //Buffer from manual renderer
         let buffer: AVAudioPCMBuffer = AVAudioPCMBuffer(pcmFormat: exportAudioNodes.audioEngine.manualRenderingFormat, frameCapacity: exportAudioNodes.audioEngine.manualRenderingMaximumFrameCount)!
         
-        while exportAudioNodes.audioEngine.manualRenderingSampleTime < file.length{
-            let framesToRender = min(buffer.frameCapacity, AVAudioFrameCount(file.length - exportAudioNodes.audioEngine.manualRenderingSampleTime))
+        var fileLength = Int64(Float(file.length) / exportAudioNodes.pitchAndSpeedNode.rate)
+        while exportAudioNodes.audioEngine.manualRenderingSampleTime < fileLength{
+            let framesToRender = min(buffer.frameCapacity, AVAudioFrameCount(fileLength - exportAudioNodes.audioEngine.manualRenderingSampleTime))
+            
             let status = try exportAudioNodes.audioEngine.renderOffline(framesToRender, to: buffer)
             
             switch status{

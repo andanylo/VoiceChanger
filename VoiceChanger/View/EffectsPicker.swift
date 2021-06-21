@@ -130,3 +130,11 @@ protocol EffectsPickerDelegate: AnyObject {
     func didPick(effects: Effects)
     func didClickOnCreate()
 }
+
+
+//Inherit from device theme protocol
+extension EffectsPicker: ThemeColorChangable{
+    func didChangeTheme(newTheme: DeviceTheme) {
+        
+    }
+}
