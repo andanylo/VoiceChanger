@@ -17,6 +17,7 @@ class ListViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.dataSource = self
         view.delegate = self
+        view.alwaysBounceVertical = true
         view.allowsMultipleSelection = false
         view.allowsSelectionDuringEditing = false
         view.backgroundColor = UIColor.lightGray
@@ -27,26 +28,15 @@ class ListViewController: UIViewController {
         return view
     }()
     
-    ///Navigation bar
-    private lazy var navigationBar: UINavigationBar = {
-        let navBar = UINavigationBar(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 44))
-        navBar.translatesAutoresizingMaskIntoConstraints = false
-        navBar.barStyle = .default
-        navBar.isTranslucent = false
-        navBar.sizeToFit()
-        let navItem = UINavigationItem(title: "Voice records")
-        navBar.setItems([navItem], animated: false)
-        navItem.searchController = searchController
-        navItem.setRightBarButton(editButtonItem, animated: false)
-        return navBar
-    }()
     
-    //Search controller
+    ///Search controller
     private lazy var searchController: UISearchController = {
         let searchControl = UISearchController(searchResultsController: nil)
-        searchControl.delegate = self
+        searchControl.searchResultsUpdater = self
         searchControl.obscuresBackgroundDuringPresentation = false
         searchControl.automaticallyShowsCancelButton = true
+        searchControl.hidesNavigationBarDuringPresentation = false
+
         return searchControl
     }()
 
@@ -84,23 +74,40 @@ class ListViewController: UIViewController {
     }
 
     
+    
     var voiceSoundCellModels: [VoiceSoundCellModel] = []
+    
+    ///Returns array of voice sound cell models, that needs to be displayed, including searchbar text
+    var displayedVoiceSoundCellModels: [VoiceSoundCellModel]{
+        get{
+            guard let searchBarText = searchController.searchBar.text else{
+                return voiceSoundCellModels
+            }
+            if searchBarText.isEmpty{
+                return voiceSoundCellModels
+            }
+            return voiceSoundCellModels.filter({$0.name?.contains(searchBarText) == true})
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        UIView.performWithoutAnimation {
+            searchController.isActive = true
+            searchController.isActive = false
+        }
+    }
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
+       
         voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0, listViewController: self)})
         
-        self.view.addSubview(navigationBar)
-
-        navigationBar.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
-        navigationBar.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-        navigationBar.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         
         self.view.addSubview(collectionView)
         
-        collectionView.topAnchor.constraint(equalTo: navigationBar.bottomAnchor, constant: 0.5).isActive = true
+        collectionView.topAnchor.constraint(equalTo:  self.view.safeAreaLayoutGuide.topAnchor).isActive = true
         collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
@@ -115,9 +122,21 @@ class ListViewController: UIViewController {
         Player.shared.delegate = self
         
         self.view.layoutIfNeeded()
-        navigationBar.prefersLargeTitles = true
-        (navigationBar.items?.first)?.largeTitleDisplayMode = .automatic
-        (navigationBar.items?.first)?.hidesSearchBarWhenScrolling = true
+        
+        //Setup navigation bar
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationItem.title = "Voice records"
+        
+        self.navigationItem.largeTitleDisplayMode = .never
+        self.navigationItem.largeTitleDisplayMode = .always
+        self.navigationItem.searchController = searchController
+        
+        self.navigationItem.setRightBarButton(editButtonItem, animated: false)
+        self.navigationController?.navigationBar.sizeToFit()
+
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+//        self.navigationController?.navigationBar.shadowImage = UIImage()
+//        self.navigationController?.navigationBar.isTranslucent = true
 
     }
     
@@ -197,7 +216,7 @@ class ListViewController: UIViewController {
                     DispatchQueue.main.async {
                         if let newName = alertTextField?.text{
                             voiceSound.name = newName
-                            guard let index = self.voiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: Int(index), section: 0)) as? VoiceSoundCell else{
+                            guard let index = self.displayedVoiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: Int(index), section: 0)) as? VoiceSoundCell else{
                                 return
                             }
                             cell.changeName(newName: newName)
@@ -216,7 +235,7 @@ class ListViewController: UIViewController {
         
         options.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
             DispatchQueue.main.async {
-                guard let cellIndex = self.voiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: cellIndex, section: 0)) else {
+                guard let cellIndex = self.displayedVoiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: cellIndex, section: 0)) else {
                     return
                 }
                 self.collectionViewDeleteAction(cell: cell)
@@ -251,37 +270,44 @@ class ListViewController: UIViewController {
             Variables.shared.currentDeviceTheme = .normal
         }
         
-        collectionView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? UIColor(red: 242 / 255, green: 242 / 255, blue: 247 / 255, alpha: 1) : .init(white: 0.1, alpha: 1)
+        collectionView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? UIColor.white : .init(white: 0.1, alpha: 1)
         recordButton.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .black
         recordButton.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
     }
     override func viewWillAppear(_ animated: Bool) {
         setTheme()
+       
     }
     
-    
-
 }
 
 ///Delegate for the search controller
-extension ListViewController: UISearchControllerDelegate{
+extension ListViewController: UISearchResultsUpdating{
+    func updateSearchResults(for searchController: UISearchController) {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
+    
     
 }
 
 ///Collection view delegate and datasource
 extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return voiceSoundCellModels.count
+        return displayedVoiceSoundCellModels.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "VoiceSoundCell", for: indexPath) as? VoiceSoundCell else{
             return UICollectionViewCell()
         }
-        cell.start(with: voiceSoundCellModels[indexPath.row], isEditing: self.isEditing)
+        
+        cell.start(with: displayedVoiceSoundCellModels[indexPath.row], isEditing: self.isEditing)
         
         return cell
     }
+    
     func changeSelected(voiceSoundCellModel: VoiceSoundCellModel){
         guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
             return
@@ -292,6 +318,7 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 $0.isSelected = false
             }
         })
+        
         collectionView.performBatchUpdates {
 
         } completion: { (_) in
@@ -299,7 +326,8 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
         }
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width - voiceSoundCellModels[indexPath.row].edges.left - voiceSoundCellModels[indexPath.row].edges.right, height: voiceSoundCellModels[indexPath.row].height)
+        let displayedModels = displayedVoiceSoundCellModels
+        return CGSize(width: self.view.frame.width - displayedModels[indexPath.row].edges.left - displayedModels[indexPath.row].edges.right, height: displayedModels[indexPath.row].height)
     }
     
     ///Delete the cell with model and view model
@@ -308,11 +336,11 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
         alertController.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
             DispatchQueue.main.async {
                 Player.shared.stopPlaying(isPausing: false)
-                guard let cell = cell, let indexPath = self.collectionView.indexPath(for: cell) else{
+                guard let cell = cell, let indexPath = self.collectionView.indexPath(for: cell), let model = (cell as? VoiceSoundCell)?.voiceSoundCellModel, let object = model.voiceSound else{
                     return
                 }
                 do{
-                    guard let url = Variables.shared.recordList.returnObject(at: indexPath.row)?.url else{
+                    guard let url = object.url else{
                         return
                     }
                     try FileManager.default.removeItem(at: url)
@@ -320,8 +348,9 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 catch{
                     
                 }
-                Variables.shared.recordList.list.remove(at: indexPath.row)
-                self.voiceSoundCellModels.remove(at: indexPath.row)
+            
+                Variables.shared.recordList.list.removeAll(where: {$0.url == object.url})
+                self.voiceSoundCellModels.removeAll(where: {$0.voiceSound?.url == object.url})
                 self.collectionView.deleteItems(at: [indexPath])
             }
         }))
@@ -358,9 +387,12 @@ extension ListViewController: RecordViewControllerDelegate{
         }
         else{
             Variables.shared.recordList.list.append(voiceSound)
-            voiceSoundCellModels.append(VoiceSoundCellModel(voiceSound: voiceSound, listViewController: self))
-            DispatchQueue.main.async {
-                self.collectionView.insertItems(at: [IndexPath(row: self.voiceSoundCellModels.count - 1, section: 0)])
+            let voiceSoundModel = VoiceSoundCellModel(voiceSound: voiceSound, listViewController: self)
+            voiceSoundCellModels.append(voiceSoundModel)
+            if displayedVoiceSoundCellModels.contains(where: {$0 === voiceSoundModel}){
+                DispatchQueue.main.async {
+                    self.collectionView.insertItems(at: [IndexPath(row: self.displayedVoiceSoundCellModels.count - 1, section: 0)])
+                }
             }
         }
     }

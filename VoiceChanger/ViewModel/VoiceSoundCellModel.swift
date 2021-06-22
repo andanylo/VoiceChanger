@@ -35,10 +35,10 @@ class VoiceSoundCellModel{
     weak var listViewController: ListViewController?
     
     ///Height of the cell
-    var defaultHeight: CGFloat = 100//50
+    var defaultHeight: CGFloat = 60
     var expandedHeight: CGFloat{
         get{
-            return defaultHeight * 4
+            return 210
         }
     }
     private var _height: CGFloat = 0.0

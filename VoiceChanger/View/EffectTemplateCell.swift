@@ -16,15 +16,18 @@ class EffectTemplateCell: UICollectionViewCell{
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        effectTemplateViewModel?.didSelect = nil
+        self.contentView.layer.shadowPath = nil
+        self.contentView.layer.shadowRadius = 0
+        self.contentView.layer.borderWidth = 0
+        self.contentView.layer.borderColor = nil
         addImage?.removeFromSuperview()
         addImage = nil
     }
     func start(effectTemplateViewModel: EffectTemplateViewModel){
-        self.contentView.layer.cornerRadius = self.contentView.frame.width / 2
+        self.contentView.layer.cornerRadius = effectTemplateViewModel.size.width / 2
         self.effectTemplateViewModel = effectTemplateViewModel
         if effectTemplateViewModel.type == .template{
-            self.contentView.layer.shadowPath = UIBezierPath(roundedRect: self.contentView.bounds, cornerRadius: self.contentView.layer.cornerRadius).cgPath
+            self.contentView.layer.shadowPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: effectTemplateViewModel.size.width, height: effectTemplateViewModel.size.height), cornerRadius: self.contentView.layer.cornerRadius).cgPath
             self.contentView.layer.shadowRadius = 3
             self.contentView.layer.shadowOffset = .zero
             self.contentView.layer.shadowOpacity = 0.3

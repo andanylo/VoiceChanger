@@ -25,6 +25,17 @@ class RecordList{
         }
     }
     
+    ///Returns the array of records that matches the text
+    func find(from name: String) -> [VoiceSound]{
+        var newList: [VoiceSound] = []
+        for sound in list{
+            if sound.name.contains(name){
+                newList.append(sound)
+            }
+        }
+        return newList
+    }
+    
     ///Returns the object at index
     func returnObject(at index: Int) -> VoiceSound?{
         if index < list.count{

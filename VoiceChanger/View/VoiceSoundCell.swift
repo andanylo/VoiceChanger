@@ -52,6 +52,7 @@ class VoiceSoundCell: UICollectionViewCell{
             guard let voiceSound = voiceSoundCellModel?.voiceSound else{
                 return
             }
+   
             
             nameLabel.text = voiceSoundCellModel?.name
             
@@ -60,9 +61,8 @@ class VoiceSoundCell: UICollectionViewCell{
             if voiceSoundCellModel?.playerViewModel != nil{
                 playerView.playerViewModel = voiceSoundCellModel?.playerViewModel
             }
-
+           
             var rotationAngle: CGFloat = voiceSoundCellModel?.isSelected == true ? CGFloat.pi / 2 : 0
-            oldValue?.didSelect = nil
             disclosureIndicator.transform = CGAffineTransform(rotationAngle: rotationAngle)
             voiceSoundCellModel?.didSelect = { selected in
                 rotationAngle = selected == true ? CGFloat.pi / 2 : 0
@@ -104,11 +104,8 @@ class VoiceSoundCell: UICollectionViewCell{
         
         leadingNameLabelConstraint?.isActive = false
         leadingNameLabelConstraint = nil
+
         
-        self.voiceSoundCellModel?.playerViewModel?.onPlayStateChange = nil
-        self.voiceSoundCellModel?.playerViewModel?.onPlayerCurrentTimeChange = nil
-        self.voiceSoundCellModel?.playerViewModel?.onSliderComponentChange = nil
-        self.voiceSoundCellModel?.playerViewModel?.onClickOptionsButton = nil
     }
     
     @objc func removeAction(){
@@ -118,16 +115,16 @@ class VoiceSoundCell: UICollectionViewCell{
     func start(with voiceSoundCellModel: VoiceSoundCellModel?, isEditing: Bool){
         self.contentView.tag = 1
         
-        
         self.backgroundColor = .white
         
         self.layer.cornerRadius = 10
         self.layer.shadowRadius = 3
         self.layer.shadowOpacity = 0.3
         self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.layer.shadowOffset = CGSize(width: 0, height: 1)
         self.layer.shouldRasterize = true
         self.layer.rasterizationScale = UIScreen.main.scale
+        
         self.contentView.layer.masksToBounds = true
         self.contentView.layer.cornerRadius = self.layer.cornerRadius
         if isEditing{
@@ -150,7 +147,7 @@ class VoiceSoundCell: UICollectionViewCell{
         
         self.contentView.addSubview(audioFileDurationLabel)
         
-        audioFileDurationLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 0).isActive = true
+        audioFileDurationLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5).isActive = true
         audioFileDurationLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor).isActive = true
         
         self.contentView.addSubview(playerView)
@@ -182,7 +179,9 @@ class VoiceSoundCell: UICollectionViewCell{
         leadingNameLabelConstraint?.isActive = true
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    
+  
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else{
             return
         }
@@ -191,5 +190,6 @@ class VoiceSoundCell: UICollectionViewCell{
             voiceSoundCellModel?.changeSelected()
         }
     }
+    
 }
 
