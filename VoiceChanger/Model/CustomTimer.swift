@@ -36,7 +36,7 @@ class CustomTimer{
     func start(){
         DispatchQueue.main.async {
             self.timer = Timer.scheduledTimer(withTimeInterval: self.timeInterval, repeats: true, block: { (timer) in
-                self.currTime += 1
+                self.currTime += Int(1000.0 * timer.timeInterval)
                 self.delegate?.timerBlock(timer: self)
             })
             RunLoop.current.add(self.timer!, forMode: .common)

@@ -33,15 +33,15 @@ class Recorder{
     
     
     
-    ///Standard settings for recording giles
+    ///Standard settings for recording files
     static let settings = [AVFormatIDKey: Int(kAudioFormatLinearPCM), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
     
     private var audioRecorder: AVAudioRecorder!
     
-    ///Record timer to count how many seconds/minutes/miliseconds has been recorder
+    ///Record timer to count how many seconds/minutes/miliseconds has been recordec
     var recordTimer: CustomTimer = CustomTimer(timeInterval: 0.001)
     
-    ///State of recorder
+    ///State of the recorder
     var isRecording: Bool{
         get{
             guard let recorder = audioRecorder else{

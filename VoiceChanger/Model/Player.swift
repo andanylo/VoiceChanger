@@ -21,7 +21,6 @@ class AudioNodes{
         
         self.pitchAndSpeedNode.rate = soundEffects.speed
         self.pitchAndSpeedNode.pitch = soundEffects.pitch
-
         
         
         if soundEffects.distortionPreset != nil{
@@ -58,6 +57,20 @@ class AudioNodes{
         }
         setEffects(effects: voiceSound.effects)
     }
+    
+    ///Apply changes from the transition, or effect value change
+    func applyTransitionChanges(effectTransitionPart: Effects.EffectPart, effects: Effects){
+        switch effectTransitionPart {
+        case .speed:
+            self.pitchAndSpeedNode.rate = effects.speed
+        case .pitch:
+            self.pitchAndSpeedNode.pitch = effects.pitch
+        case .distortion:
+            self.distortionNode.wetDryMix = effects.distortion
+        case .reverb:
+            self.reverbNode.wetDryMix = effects.reverb
+        }
+    }
 }
 
 ///Class that plays an audio file with effects
@@ -70,7 +83,7 @@ class Player{
     
     var currentVoiceSound: VoiceSound?
     
-    private var playerTimer = CustomTimer(timeInterval: 0.001)
+    private var playerTimer = CustomTimer(timeInterval: 0.01)
     
     ///Initializtion that initiates an audio engine
     init(){
@@ -88,6 +101,13 @@ class Player{
             Player.shared.setPlayback()
 
             try self.audioNodes.setUp(voiceSound: voiceSound)
+            
+            ///Set up effect transition change configuration to avaudonodes
+            if !voiceSound.effects.effectTransitions.isEmpty{
+                voiceSound.effects.applyTransitionChanges = { [weak self] effectPart in
+                    self?.audioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: voiceSound.effects)
+                }
+            }
             
             if !self.audioNodes.audioEngine.isRunning{
                 self.audioNodes.audioEngine.prepare()
@@ -112,6 +132,7 @@ class Player{
     ///Method that executes after the player stopped playing
     private func didStop(isPausing: Bool){
         if !isPausing{
+            currentVoiceSound?.effects.resetEffects()
             playerTimer.reset()
         }
         else{
@@ -153,7 +174,7 @@ class Player{
     private var previousValue: Double = 0.0
 }
 extension Player: CustomTimerDelegate{
-    ///Stop the player if current time is greater than duration
+    ///Block that indicates the audio player playback
     func timerBlock(timer: CustomTimer) {
         
         if self.audioNodes.audioEngine.isRunning {
@@ -162,6 +183,10 @@ extension Player: CustomTimerDelegate{
                 if currentTime >= self.currentVoiceSound?.duration.returnSeconds() ?? 0.0{
                     self.stopPlaying(isPausing: false)
                 }
+                
+                currentVoiceSound?.effects.effectTransitions.forEach({transition in
+                    transition.changeEffect(currentPlayerTime: currentTime, updateInterval: timer.timeInterval)
+                })
                 
                 self.delegate?.didUpdateCurrentTime(currentTime: TimeComponents(seconds: currentTime))
                 self.previousValue = currentTime

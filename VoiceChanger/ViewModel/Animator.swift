@@ -24,6 +24,7 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             transitionContext.completeTransition(true)
             return
         }
+        
         toView.isHidden = true
         toView.layoutIfNeeded()
         transitionContext.containerView.addSubview(toView)

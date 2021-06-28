@@ -28,7 +28,7 @@ class FileExporter{
         //Schedule file
         self.exportAudioNodes.audioPlayer.scheduleFile(file, at: nil, completionHandler: nil)
         //Enable manual rendering mode
-        let maxNumberOfFrames: AVAudioFrameCount = 4096
+        let maxNumberOfFrames: AVAudioFrameCount = 4
         try exportAudioNodes.audioEngine.enableManualRenderingMode(.offline, format: file.processingFormat, maximumFrameCount: maxNumberOfFrames)
         
         //Start engine
@@ -46,8 +46,23 @@ class FileExporter{
         let buffer: AVAudioPCMBuffer = AVAudioPCMBuffer(pcmFormat: exportAudioNodes.audioEngine.manualRenderingFormat, frameCapacity: exportAudioNodes.audioEngine.manualRenderingMaximumFrameCount)!
         
         var fileLength = Int64(Float(file.length) / exportAudioNodes.pitchAndSpeedNode.rate)
+        
+        //Set transition change block
+        if !voiceSound.effects.effectTransitions.isEmpty{
+            voiceSound.effects.applyTransitionChanges = { [weak self] effectPart in
+                self?.exportAudioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: voiceSound.effects)
+            }
+        }
+        
         while exportAudioNodes.audioEngine.manualRenderingSampleTime < fileLength{
             let framesToRender = min(buffer.frameCapacity, AVAudioFrameCount(fileLength - exportAudioNodes.audioEngine.manualRenderingSampleTime))
+            
+            voiceSound.effects.effectTransitions.forEach({transition in
+                transition.changeEffect(currentFrame: exportAudioNodes.audioEngine.manualRenderingSampleTime, updateInterval: maxNumberOfFrames)
+            })
+            
+           
+            fileLength = Int64(Float(file.length) / exportAudioNodes.pitchAndSpeedNode.rate)
             
             let status = try exportAudioNodes.audioEngine.renderOffline(framesToRender, to: buffer)
             

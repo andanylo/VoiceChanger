@@ -156,7 +156,7 @@ class ListViewController: UIViewController {
         popUpController.modalPresentationStyle = .overCurrentContext
         Animator.shared.duration = 0.72
         popUpController.transitioningDelegate = self
-        self.present(popUpController, animated: true, completion: nil)
+        self.navigationController?.present(popUpController, animated: true, completion: nil)
     }
     
     @objc func didClickOnRecord(){
@@ -179,7 +179,7 @@ class ListViewController: UIViewController {
             loadingViewController.modalPresentationStyle = .overCurrentContext
             loadingViewController.transitioningDelegate = self
             Animator.shared.duration = 0.4
-            self.present(loadingViewController, animated: true, completion: nil)
+            self.navigationController?.present(loadingViewController, animated: true, completion: nil)
             
             DispatchQueue.global(qos: .background).async {
                 do{
@@ -224,7 +224,7 @@ class ListViewController: UIViewController {
                     }
                 }))
                 renameAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-                self.present(renameAlert, animated: true, completion: nil)
+                self.navigationController?.present(renameAlert, animated: true, completion: nil)
             }
         }))
         options.addAction(UIAlertAction(title: "Rerecord", style: .default, handler: { (_) in
@@ -245,7 +245,7 @@ class ListViewController: UIViewController {
         options.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
         
-        self.present(options, animated: true, completion: nil)
+        self.navigationController?.present(options, animated: true, completion: nil)
     }
     
     
@@ -355,7 +355,7 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
             }
         }))
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        self.present(alertController, animated: true, completion: nil)
+        self.navigationController?.present(alertController, animated: true, completion: nil)
     }
 }
 
@@ -370,7 +370,7 @@ extension ListViewController: UIViewControllerTransitioningDelegate{
     }
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         Animator.shared.presenting = true
-        Animator.shared.firstViewController = source
+        Animator.shared.firstViewController = self
         Animator.shared.secondViewController = presented
         return Animator.shared
     }

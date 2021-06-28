@@ -114,5 +114,12 @@ extension PlayerViewModel: EffectsPickerDelegate{
     func didPick(effects: Effects) {
         self.voiceSound?.effects = effects
         Player.shared.audioNodes.setEffects(effects: effects)
+        
+        ///Set up effect transition change configuration to avaudonodes
+        if Player.shared.currentVoiceSound?.effects.effectTransitions.isEmpty == false && Player.shared.currentVoiceSound === self.voiceSound && voiceSound?.playerState.isPlaying == true{
+            self.voiceSound?.effects.applyTransitionChanges = { effectPart in
+                Player.shared.audioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: effects)
+            }
+        }
     }
 }

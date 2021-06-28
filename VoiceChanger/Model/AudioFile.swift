@@ -11,7 +11,7 @@ import AVFoundation
 class AudioFile: AVAudioFile{
     
     ///Returns a frame count of an audio file
-    private var frameCount: AVAudioFrameCount{
+    var frameCount: AVAudioFrameCount{
         get{
             return AVAudioFrameCount(self.length)
         }

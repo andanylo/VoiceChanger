@@ -43,7 +43,7 @@ class VoiceChangerTests: XCTestCase {
     }
     func testTimerLabelModel(){
         let timeLabelModel = TimerLabelModel(format: "mm:ss.MM")
-        let timeComponents = TimeComponents(seconds: 32, minutes: 1, miliseconds: 450)
+        let timeComponents = TimeComponents(seconds: 90.32)
         
         XCTAssertEqual(timeLabelModel.returnText(from: timeComponents), "01:32.45")
     }
@@ -54,11 +54,16 @@ class VoiceChangerTests: XCTestCase {
         XCTAssertTrue(timer.timeComponents.minutes < 60 && timer.timeComponents.seconds < 60 && timer.timeComponents.miliseconds < 1000)
     }
     
-    func testTimeComponents(){
-        let timeComponents = TimeComponents(seconds: 16, minutes: 0, miliseconds: 9)
-        let timeComponents2 = TimeComponents(seconds: 9, minutes: 0, miliseconds: 866)
-        XCTAssertEqual(timeComponents.returnSeconds(), 16.009)
-        XCTAssertEqual(timeComponents2.returnCombinedMiliseconds(), 9866)
+    func testEffectTransition(){
+        let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
+        let effectTransition = EffectTransition(effects: effect, startPoint: .custom(2/10), endPoint: .custom(7/10), transitionValue: 2, effectPartToTransition: .speed)
+        effectTransition.fileDuration = {
+            return TimeComponents(seconds: 10)
+        }
+        for i in 0...10{
+            effectTransition.changeEffect(currentPlayerTime: Double(i), updateInterval: 1)
+        }
+        XCTAssertEqual(Int(effect.speed), 2)
     }
     
     

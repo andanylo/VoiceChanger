@@ -72,7 +72,25 @@ class VoiceSound{
     
     
     ///Effects for the sound
-    var effects: Effects = Effects()
+    var effects: Effects = Effects(){
+        didSet{
+            ///Configure effect transitions
+            oldValue.effectTransitions.forEach({transition in
+                transition.fileDuration = nil
+                transition.fileDurationFrames = nil
+            })
+            oldValue.applyTransitionChanges = nil
+            
+            effects.effectTransitions.forEach({ [unowned self] transition in
+                transition.fileDuration = {
+                    return self.duration
+                }
+                transition.fileDurationFrames = {
+                    return self.audioFile?.frameCount ?? 0
+                }
+            })
+        }
+    }
     
     init(){
         self.pathComponent = UUID().uuidString + ".m4a"

@@ -12,11 +12,11 @@ import UIKit
 class EffectsPicker: UIView{
     private let effects = [
         ///Normal
-        Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0),
         ///Drunk
-        Effects(speed: 0.6, pitch: -100, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        Effects(speed: 0.6, pitch: -100, distortion: 0, reverb: 0),
         ///Robot
-        Effects(speed: 1, pitch: -400, distortion: 10, reverb: 0, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        Effects(speed: 1, pitch: -400, distortion: 10, reverb: 0),
         ///small robot
         Effects(speed: 1, pitch: 400, distortion: 10, reverb: 0, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         //Bee
@@ -26,11 +26,11 @@ class EffectsPicker: UIView{
         ///Canyon
         Effects(speed: 1, pitch: 0, distortion: 100, reverb: 5, distortionPreset: .multiEcho2, reverbPreset: .cathedral),
         ///Scary
-        Effects(speed: 0.8, pitch: -1000, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        Effects(speed: 0.8, pitch: -1000, distortion: 0, reverb: 0),
         ///Fast and helium
-        Effects(speed: 2, pitch: 2000, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil),
+        Effects(speed: 2, pitch: 2000, distortion: 0, reverb: 0),
         ///Slow
-        Effects(speed: 0.5, pitch: -2000, distortion: 0, reverb: 0, distortionPreset: nil, reverbPreset: nil)
+        Effects(speed: 0.5, pitch: -2000, distortion: 0, reverb: 0)
     ]
     
     var effectsTemplateViewModels = [EffectTemplateViewModel]()
@@ -76,6 +76,9 @@ class EffectsPicker: UIView{
         self.effectsTemplateViewModels = effects.map({return EffectTemplateViewModel(type: .template, effects: $0)})
         self.effectsTemplateViewModels.insert(EffectTemplateViewModel(type: .empty, effects: nil), at: 0)
         
+        let transitionEffect = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
+        transitionEffect.effectTransitions = [EffectTransition(effects: transitionEffect, startPoint: .half, endPoint: .end, transitionValue: 0.4, effectPartToTransition: .speed), EffectTransition(effects: transitionEffect, startPoint: .half, endPoint: .end, transitionValue: -700, effectPartToTransition: .pitch)]
+        self.effectsTemplateViewModels.append(EffectTemplateViewModel(type: .template, effects: transitionEffect))
         self.addSubview(collectionView)
         
         collectionView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
