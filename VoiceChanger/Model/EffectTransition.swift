@@ -107,6 +107,29 @@ class EffectTransition{
         }
     }
     
+    
+    ///Duration of the transition in frames
+    func duration(processFrameCount: UInt32) -> UInt32{
+        if effectPartToTransition == .speed{
+            effect.resetEffects()
+            _startEffectValue = returnEffectValueToChange()
+            var effectValue = _startEffectValue
+            
+            let difference = endPointFrames - startPointFrames
+            let intervals = difference / processFrameCount
+            
+            let valuePerInterval = calculateValuePerInterval(updateInterval: Double(processFrameCount), startTime: Double(startPointFrames), endTime: Double(endPointFrames))
+            
+            var duration: Double = 0.0
+            for _ in 0..<intervals{
+                effectValue += valuePerInterval
+                duration += Double(processFrameCount) / Double(effectValue)
+            }
+            return UInt32(duration)
+        }
+        return endPointFrames - startPointFrames
+    }
+    
     ///Transition effect by update interval in seconds, during playing in player
     func changeEffect(currentPlayerTime: Double, updateInterval: Double){
 

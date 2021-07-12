@@ -15,6 +15,32 @@ class FileExporter{
        return AudioNodes(audioEngine: AudioEngine(), audioPlayer: AudioPlayerNode(), pitchAndSpeedNode: AVAudioUnitTimePitch(), distortionNode: AVAudioUnitDistortion(), reverbNode: AVAudioUnitReverb())
     }()
     
+    //TODO:
+    //Think about optimizing the frame count
+    ///Count the frames with effect transitions
+    private func frameCount(file: AudioFile, effects: Effects, processFrameCount: UInt32) -> UInt32{
+        var speedTransitions = effects.effectTransitions.filter({$0.effectPartToTransition == .speed})
+        
+        if !speedTransitions.isEmpty{
+            speedTransitions.sort(by: {$0.startPointFrames < $1.startPointFrames})
+            var duration: UInt32 = 0
+            for i in 0..<speedTransitions.count{
+                if i == 0{
+                    duration += UInt32(Double(speedTransitions[i].startPointFrames) / Double(effects.speed))
+                }
+                if i == speedTransitions.count - 1{
+                    duration += UInt32(Double(file.frameCount - speedTransitions[i].endPointFrames) / Double(speedTransitions[i].transitionValue))
+                }
+                else if i != 0{
+                    duration += UInt32(Double(speedTransitions[i].startPointFrames - speedTransitions[i-1].endPointFrames) / Double(speedTransitions[i-1].transitionValue))
+                }
+                duration += speedTransitions[i].duration(processFrameCount: processFrameCount)
+            }
+            return duration
+        }
+        return file.frameCount
+    }
+    
     ///Creates and exports an audioFile with effects
     func exportFile(voiceSound: VoiceSound, completion: @escaping ((URL) -> Void)) throws{
         
@@ -45,7 +71,7 @@ class FileExporter{
         //Buffer from manual renderer
         let buffer: AVAudioPCMBuffer = AVAudioPCMBuffer(pcmFormat: exportAudioNodes.audioEngine.manualRenderingFormat, frameCapacity: exportAudioNodes.audioEngine.manualRenderingMaximumFrameCount)!
         
-        var fileLength = Int64(Float(file.length) / exportAudioNodes.pitchAndSpeedNode.rate)
+        let fileLength = Int64(frameCount(file: file, effects: voiceSound.effects, processFrameCount: maxNumberOfFrames))
         
         //Set transition change block
         if !voiceSound.effects.effectTransitions.isEmpty{
@@ -61,8 +87,6 @@ class FileExporter{
                 transition.changeEffect(currentFrame: exportAudioNodes.audioEngine.manualRenderingSampleTime, updateInterval: maxNumberOfFrames)
             })
             
-           
-            fileLength = Int64(Float(file.length) / exportAudioNodes.pitchAndSpeedNode.rate)
             
             let status = try exportAudioNodes.audioEngine.renderOffline(framesToRender, to: buffer)
             
