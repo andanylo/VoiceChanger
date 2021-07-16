@@ -80,12 +80,13 @@ class EffectTransition{
     var isTransitioning = false
     
     ///Initialize with effects, to which this class relates to
-    init(effects: Effects, startPoint: EffectPoint, endPoint: EffectPoint, transitionValue: Float, effectPartToTransition: Effects.EffectPart){
+    init(effects: Effects, startPoint: EffectPoint, endPoint: EffectPoint, fromValue: Float, transitionValue: Float, effectPartToTransition: Effects.EffectPart){
         self.effect = effects
         self.startPoint = startPoint
         self.endPoint = endPoint
         self.transitionValue = transitionValue
         self.effectPartToTransition = effectPartToTransition
+        self._startEffectValue = fromValue
     }
     
     
@@ -112,9 +113,9 @@ class EffectTransition{
     func duration(processFrameCount: UInt32) -> UInt32{
         if effectPartToTransition == .speed{
             effect.resetEffects()
-            _startEffectValue = returnEffectValueToChange()
+//            _startEffectValue = returnEffectValueToChange()
             var effectValue = _startEffectValue
-            
+
             let difference = endPointFrames - startPointFrames
             let intervals = difference / processFrameCount
             
@@ -138,9 +139,9 @@ class EffectTransition{
         
 
         if currentPlayerTime >= startPointSeconds && currentRoundedSpeed != transitionRoundedValue{
-            if self.isTransitioning == false{
-                _startEffectValue = returnEffectValueToChange()
-            }
+//            if self.isTransitioning == false{
+//                _startEffectValue = returnEffectValueToChange()
+//            }
             self.isTransitioning = true
         }
         else{
@@ -148,13 +149,18 @@ class EffectTransition{
         }
         
         if self.isTransitioning{
-            let valuePerInterval = calculateValuePerInterval(updateInterval: updateInterval, startTime: startPointSeconds, endTime: endPointSeconds)
-            let expectedValue = expectedValueAt(seconds: currentPlayerTime, valuePerInterval: valuePerInterval, timeInterval: updateInterval)
+            let expectedValue = expectedValue(updateInterval: updateInterval, currentPlayerTime: currentPlayerTime)
             
             if currentRoundedSpeed != expectedValue{
                 applyChanges(new: expectedValue)
             }
         }
+    }
+    
+    func expectedValue(updateInterval: Double, currentPlayerTime: Double) -> Float{
+        let valuePerInterval = calculateValuePerInterval(updateInterval: updateInterval, startTime: startPointSeconds, endTime: endPointSeconds)
+      
+        return expectedValueAt(seconds: currentPlayerTime, valuePerInterval: valuePerInterval, timeInterval: updateInterval)
     }
     
     ///Expected value at specific seconds
@@ -187,9 +193,9 @@ class EffectTransition{
         let transitionRoundedValue = Float(transitionValue * 100).rounded() / 100
         
         if currentFrame >= startPointFrames && currentRoundedSpeed != transitionRoundedValue{
-            if self.isTransitioning == false{
-                _startEffectValue = returnEffectValueToChange()
-            }
+//            if self.isTransitioning == false{
+//                _startEffectValue = returnEffectValueToChange()
+//            }
             self.isTransitioning = true
         }
         else{

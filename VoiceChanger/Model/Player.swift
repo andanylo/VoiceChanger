@@ -114,6 +114,15 @@ class Player{
                 try self.audioNodes.audioEngine.start()
             }
             
+            ///Adapt to time with transitions
+            if time.returnCombinedMiliseconds() != 0 && !voiceSound.effects.effectTransitions.isEmpty{
+               
+                Effects.EffectPart.allCases.forEach({ effectPart in
+                    let value = voiceSound.effects.expectedValue(for: effectPart, at: time.returnSeconds())
+                    voiceSound.effects.changeEffect(new: value, effectToChange: effectPart)
+                })
+            }
+            
             try self.audioNodes.audioPlayer.play(from: time)
             
             self.currentVoiceSound = voiceSound

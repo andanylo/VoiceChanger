@@ -103,12 +103,54 @@ class Effects: NSObject{
         }
     }
     
+    func getEffectValue(type: EffectPart) -> Float{
+        switch type{
+        case .speed:
+            return self.originalSpeed
+        case .pitch:
+            return self.originalPitch
+        case .distortion:
+            return self.originalDistortion
+        case .reverb:
+            return self.originalReverb
+        }
+    }
+    
     ///Reset effects
     func resetEffects(){
         self.speed = self.originalSpeed
         self.pitch = self.originalPitch
         self.distortion = self.originalDistortion
         self.reverb = self.originalReverb
+    }
+    ///Expected value at seconds
+    func expectedValue(for effect: EffectPart, at seconds: Double) -> Float{
+        let standardValue = getEffectValue(type: effect)
+        let newEffectTransitions = effectTransitions.filter({$0.effectPartToTransition == effect})
+        
+        if !newEffectTransitions.isEmpty{
+            
+            ///Retrun the value during transition
+            if let effectTransition = newEffectTransitions.first(where: {seconds >= $0.startPointSeconds && seconds <= $0.endPointSeconds}){
+                return effectTransition.expectedValue(updateInterval: 0.01, currentPlayerTime: seconds)
+            }
+            
+            ///Return in-between value between transitions or start
+            for i in 0..<newEffectTransitions.count{
+                let previousTransition: EffectTransition? = i == 0 ? nil : effectTransitions[i-1]
+                let currentTransition = effectTransitions[i]
+                
+                if seconds < currentTransition.endPointSeconds && seconds > (previousTransition?.startPointSeconds ?? 0){
+                    return previousTransition?.transitionValue ?? standardValue
+                }
+            }
+            
+            ///Return the end value of effect, if it is the last effect
+            if seconds > newEffectTransitions.last!.endPointSeconds{
+                return newEffectTransitions.last!.transitionValue
+            }
+        }
+        return standardValue
     }
     
     ///Method that checks if other Effects class is equal
@@ -120,7 +162,7 @@ class Effects: NSObject{
     }
     
     ///Effect part
-    enum EffectPart{
+    enum EffectPart: CaseIterable{
         case speed
         case pitch
         case distortion

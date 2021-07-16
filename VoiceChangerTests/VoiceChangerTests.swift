@@ -56,7 +56,8 @@ class VoiceChangerTests: XCTestCase {
     
     func testEffectTransition(){
         let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
-        let effectTransition = EffectTransition(effects: effect, startPoint: .custom(2/10), endPoint: .custom(7/10), transitionValue: 2, effectPartToTransition: .speed)
+        let effectTransition = EffectTransition(effects: effect, startPoint: .custom(2/10), endPoint: .custom(7/10), fromValue: 1, transitionValue: 2, effectPartToTransition: .speed)
+        effect.effectTransitions = [effectTransition]
         effectTransition.fileDuration = {
             return TimeComponents(seconds: 10)
         }
@@ -64,6 +65,25 @@ class VoiceChangerTests: XCTestCase {
             effectTransition.changeEffect(currentPlayerTime: Double(i), updateInterval: 1)
         }
         XCTAssertEqual(Int(effect.speed), 2)
+    }
+    
+    func testExpectedEffect(){
+        let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
+        let effectTransition1 = EffectTransition(effects: effect, startPoint: .custom(2/10), endPoint: .custom(4/10), fromValue: 1, transitionValue: 2, effectPartToTransition: .speed)
+        let effectTransition2 = EffectTransition(effects: effect, startPoint: .custom(6/10), endPoint: .custom(8/10), fromValue: 2, transitionValue: 1, effectPartToTransition: .speed)
+        effect.effectTransitions = [effectTransition1, effectTransition2]
+        
+        [effectTransition1, effectTransition2].forEach({
+            $0.fileDuration = {
+                return TimeComponents(seconds: 10)
+            }
+        })
+        let value1 = effect.expectedValue(for: .speed, at: 3) // 1.5
+        let value2 = effect.expectedValue(for: .speed, at: 5) // 2.0
+        let value3 = effect.expectedValue(for: .speed, at: 7) // 1.5
+        let value4 = effect.expectedValue(for: .speed, at: 9) // 1
+        
+        XCTAssertTrue(value1 == 1.5 && value2 == 2.0 && value3 == 1.5 && value4 == 1)
     }
     
     
