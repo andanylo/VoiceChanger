@@ -26,7 +26,7 @@ class FileExporter{
             var duration: UInt32 = 0
             for i in 0..<speedTransitions.count{
                 if i == 0{
-                    duration += UInt32(Double(speedTransitions[i].startPointFrames) / Double(effects.speed))
+                    duration += UInt32(Double(speedTransitions[i].startPointFrames) / Double(effects.standardValues.speed))
                 }
                 if i == speedTransitions.count - 1{
                     duration += UInt32(Double(file.frameCount - speedTransitions[i].endPointFrames) / Double(speedTransitions[i].transitionValue))
@@ -38,7 +38,7 @@ class FileExporter{
             }
             return duration
         }
-        return file.frameCount
+        return UInt32(Float(file.frameCount) / effects.standardValues.speed)
     }
     
     ///Creates and exports an audioFile with effects
@@ -54,7 +54,7 @@ class FileExporter{
         //Schedule file
         self.exportAudioNodes.audioPlayer.scheduleFile(file, at: nil, completionHandler: nil)
         //Enable manual rendering mode
-        let maxNumberOfFrames: AVAudioFrameCount = 4
+        let maxNumberOfFrames: AVAudioFrameCount = 8
         try exportAudioNodes.audioEngine.enableManualRenderingMode(.offline, format: file.processingFormat, maximumFrameCount: maxNumberOfFrames)
         
         //Start engine
@@ -72,23 +72,23 @@ class FileExporter{
         let buffer: AVAudioPCMBuffer = AVAudioPCMBuffer(pcmFormat: exportAudioNodes.audioEngine.manualRenderingFormat, frameCapacity: exportAudioNodes.audioEngine.manualRenderingMaximumFrameCount)!
         
         let fileLength = Int64(frameCount(file: file, effects: voiceSound.effects, processFrameCount: maxNumberOfFrames))
-        
         //Set transition change block
         if !voiceSound.effects.effectTransitions.isEmpty{
-            voiceSound.effects.applyTransitionChanges = { [weak self] effectPart in
+            voiceSound.effects.currentValues.applyTransitionChanges = { [weak self] effectPart in
+                
                 self?.exportAudioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: voiceSound.effects)
             }
         }
         
+        var renderCurrentFrame: Double = 0.0
         while exportAudioNodes.audioEngine.manualRenderingSampleTime < fileLength{
-            let framesToRender = min(buffer.frameCapacity, AVAudioFrameCount(fileLength - exportAudioNodes.audioEngine.manualRenderingSampleTime))
             
             voiceSound.effects.effectTransitions.forEach({transition in
-                transition.changeEffect(currentFrame: exportAudioNodes.audioEngine.manualRenderingSampleTime, updateInterval: maxNumberOfFrames)
+                transition.changeEffect(currentFrame: AVAudioFramePosition(renderCurrentFrame), updateInterval: maxNumberOfFrames)
             })
+            renderCurrentFrame += Double(maxNumberOfFrames) * Double(voiceSound.effects.currentValues.speed)
             
-            
-            let status = try exportAudioNodes.audioEngine.renderOffline(framesToRender, to: buffer)
+            let status = try exportAudioNodes.audioEngine.renderOffline(buffer.frameCapacity, to: buffer)
             
             switch status{
             case .success:
@@ -98,7 +98,9 @@ class FileExporter{
             }
         }
         completion(exportURL)
+        voiceSound.effects.resetEffects()
         exportAudioNodes.audioPlayer.stop()
+        exportAudioNodes.audioEngine.disableManualRenderingMode()
         exportAudioNodes.audioEngine.stop()
     }
 }

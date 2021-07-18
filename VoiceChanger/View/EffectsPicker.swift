@@ -77,8 +77,8 @@ class EffectsPicker: UIView{
         self.effectsTemplateViewModels.insert(EffectTemplateViewModel(type: .empty, effects: nil), at: 0)
         
         let transitionEffect = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
-        transitionEffect.effectTransitions = [EffectTransition(effects: transitionEffect, startPoint: .custom(1/10), endPoint: .custom(3/10), fromValue: transitionEffect.pitch, transitionValue: 5000, effectPartToTransition: .pitch),
-                                              EffectTransition(effects: transitionEffect, startPoint: .custom(1/10), endPoint: .custom(3/10), fromValue: transitionEffect.speed, transitionValue: 3, effectPartToTransition: .speed)
+        transitionEffect.effectTransitions = [EffectTransition(effects: transitionEffect, startPoint: .custom(1/10), endPoint: .custom(3/10), fromValue: transitionEffect.standardValues.speed, transitionValue: 2, effectPartToTransition: .speed),
+                                              EffectTransition(effects: transitionEffect, startPoint: .custom(5/10), endPoint: .custom(8/10), fromValue: 2, transitionValue: 0.1, effectPartToTransition: .speed)
         ]
         self.effectsTemplateViewModels.append(EffectTemplateViewModel(type: .template, effects: transitionEffect))
         self.addSubview(collectionView)

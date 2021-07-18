@@ -19,8 +19,8 @@ class AudioNodes{
     func setEffects(effects: Effects?){
         let soundEffects = effects ?? Effects()
         
-        self.pitchAndSpeedNode.rate = soundEffects.speed
-        self.pitchAndSpeedNode.pitch = soundEffects.pitch
+        self.pitchAndSpeedNode.rate = soundEffects.currentValues.speed
+        self.pitchAndSpeedNode.pitch = soundEffects.currentValues.pitch
         
         
         if soundEffects.distortionPreset != nil{
@@ -29,8 +29,8 @@ class AudioNodes{
         if soundEffects.reverbPreset != nil{
             self.reverbNode.loadFactoryPreset(soundEffects.reverbPreset!)
         }
-        self.distortionNode.wetDryMix = soundEffects.distortion
-        self.reverbNode.wetDryMix = soundEffects.reverb
+        self.distortionNode.wetDryMix = soundEffects.currentValues.distortion
+        self.reverbNode.wetDryMix = soundEffects.currentValues.reverb
     }
     init(audioEngine: AudioEngine, audioPlayer: AudioPlayerNode, pitchAndSpeedNode: AVAudioUnitTimePitch, distortionNode: AVAudioUnitDistortion, reverbNode: AVAudioUnitReverb) {
         self.audioEngine = audioEngine
@@ -59,16 +59,16 @@ class AudioNodes{
     }
     
     ///Apply changes from the transition, or effect value change
-    func applyTransitionChanges(effectTransitionPart: Effects.EffectPart, effects: Effects){
+    func applyTransitionChanges(effectTransitionPart: EffectPart, effects: Effects){
         switch effectTransitionPart {
         case .speed:
-            self.pitchAndSpeedNode.rate = effects.speed
+            self.pitchAndSpeedNode.rate = effects.currentValues.speed
         case .pitch:
-            self.pitchAndSpeedNode.pitch = effects.pitch
+            self.pitchAndSpeedNode.pitch = effects.currentValues.pitch
         case .distortion:
-            self.distortionNode.wetDryMix = effects.distortion
+            self.distortionNode.wetDryMix = effects.currentValues.distortion
         case .reverb:
-            self.reverbNode.wetDryMix = effects.reverb
+            self.reverbNode.wetDryMix = effects.currentValues.reverb
         }
     }
 }
@@ -104,7 +104,7 @@ class Player{
             
             ///Set up effect transition change configuration to avaudonodes
             if !voiceSound.effects.effectTransitions.isEmpty{
-                voiceSound.effects.applyTransitionChanges = { [weak self] effectPart in
+                voiceSound.effects.currentValues.applyTransitionChanges = { [weak self] effectPart in
                     self?.audioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: voiceSound.effects)
                 }
             }
@@ -115,9 +115,9 @@ class Player{
             }
             
             ///Adapt to time with transitions
-            if time.returnCombinedMiliseconds() != 0 && !voiceSound.effects.effectTransitions.isEmpty{
+            if !voiceSound.effects.effectTransitions.isEmpty{
                
-                Effects.EffectPart.allCases.forEach({ effectPart in
+                EffectPart.allCases.forEach({ effectPart in
                     let value = voiceSound.effects.expectedValue(for: effectPart, at: time.returnSeconds())
                     voiceSound.effects.changeEffect(new: value, effectToChange: effectPart)
                 })

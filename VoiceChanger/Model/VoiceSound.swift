@@ -79,7 +79,7 @@ class VoiceSound{
                 transition.fileDuration = nil
                 transition.fileDurationFrames = nil
             })
-            oldValue.applyTransitionChanges = nil
+            oldValue.currentValues.applyTransitionChanges = nil
             
             effects.effectTransitions.forEach({ [unowned self] transition in
                 transition.fileDuration = {

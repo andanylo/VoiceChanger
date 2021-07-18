@@ -21,7 +21,7 @@ class EffectTransition{
     unowned var effect: Effects!
     
     ///Effect part to change
-    var effectPartToTransition: Effects.EffectPart!
+    var effectPartToTransition: EffectPart!
     
     ///Start point of the transition
     private var startPoint: EffectPoint!
@@ -80,7 +80,7 @@ class EffectTransition{
     var isTransitioning = false
     
     ///Initialize with effects, to which this class relates to
-    init(effects: Effects, startPoint: EffectPoint, endPoint: EffectPoint, fromValue: Float, transitionValue: Float, effectPartToTransition: Effects.EffectPart){
+    init(effects: Effects, startPoint: EffectPoint, endPoint: EffectPoint, fromValue: Float, transitionValue: Float, effectPartToTransition: EffectPart){
         self.effect = effects
         self.startPoint = startPoint
         self.endPoint = endPoint
@@ -96,13 +96,13 @@ class EffectTransition{
     private func returnEffectValueToChange() -> Float{
         switch effectPartToTransition {
         case .speed:
-            return effect.speed
+            return effect.currentValues.speed
         case .pitch:
-            return effect.pitch
+            return effect.currentValues.pitch
         case .distortion:
-            return effect.distortion
+            return effect.currentValues.distortion
         case .reverb:
-            return effect.reverb
+            return effect.currentValues.reverb
         case .none:
             return 0.0
         }
@@ -113,7 +113,6 @@ class EffectTransition{
     func duration(processFrameCount: UInt32) -> UInt32{
         if effectPartToTransition == .speed{
             effect.resetEffects()
-//            _startEffectValue = returnEffectValueToChange()
             var effectValue = _startEffectValue
 
             let difference = endPointFrames - startPointFrames
@@ -139,9 +138,6 @@ class EffectTransition{
         
 
         if currentPlayerTime >= startPointSeconds && currentRoundedSpeed != transitionRoundedValue{
-//            if self.isTransitioning == false{
-//                _startEffectValue = returnEffectValueToChange()
-//            }
             self.isTransitioning = true
         }
         else{
@@ -193,9 +189,6 @@ class EffectTransition{
         let transitionRoundedValue = Float(transitionValue * 100).rounded() / 100
         
         if currentFrame >= startPointFrames && currentRoundedSpeed != transitionRoundedValue{
-//            if self.isTransitioning == false{
-//                _startEffectValue = returnEffectValueToChange()
-//            }
             self.isTransitioning = true
         }
         else{
