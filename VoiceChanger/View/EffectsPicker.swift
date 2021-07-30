@@ -25,7 +25,7 @@ class EffectsPicker: UIView{
         Effects(speed: 1, pitch: 200, distortion: 10, reverb: 0, distortionPreset: .speechCosmicInterference, reverbPreset: nil),
         ///Canyon
         Effects(speed: 1, pitch: 0, distortion: 100, reverb: 5, distortionPreset: .multiEcho2, reverbPreset: .cathedral),
-        ///Scary
+        ///Scary/devil
         Effects(speed: 0.8, pitch: -1000, distortion: 0, reverb: 0),
         ///Fast and helium
         Effects(speed: 2, pitch: 2000, distortion: 0, reverb: 0),
@@ -76,11 +76,20 @@ class EffectsPicker: UIView{
         self.effectsTemplateViewModels = effects.map({return EffectTemplateViewModel(type: .template, effects: $0)})
         self.effectsTemplateViewModels.insert(EffectTemplateViewModel(type: .empty, effects: nil), at: 0)
         
+        //low battery
         let transitionEffect = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
-        transitionEffect.effectTransitions = [EffectTransition(effects: transitionEffect, startPoint: .custom(1/10), endPoint: .custom(3/10), fromValue: transitionEffect.standardValues.speed, transitionValue: 2, effectPartToTransition: .speed),
-                                              EffectTransition(effects: transitionEffect, startPoint: .custom(5/10), endPoint: .custom(8/10), fromValue: 2, transitionValue: 0.1, effectPartToTransition: .speed)
+        transitionEffect.effectTransitions = [EffectTransition(effects: transitionEffect, startPoint: .custom(1/2), endPoint: .custom(1), fromValue: transitionEffect.standardValues.speed, transitionValue: 0.2, effectPartToTransition: .speed),
+                                              EffectTransition(effects: transitionEffect, startPoint: .custom(1/2), endPoint: .custom(1), fromValue: 0, transitionValue: -500, effectPartToTransition: .pitch)
         ]
+        
+        //Test
+        let transitionEffect2 = Effects(speed: 1, pitch: 1000, distortion: 0, reverb: 0)
+        
+        for i in 0..<50{
+            transitionEffect2.effectTransitions.append(EffectTransition(effects: transitionEffect2, startPoint: .custom(Double(i) / 50.0), endPoint: .custom(Double(i+1) / 50.0), fromValue: (i % 2 == 0) ? 1000 : -1000, transitionValue: (i % 2 == 0) ? -1000 : 1000, effectPartToTransition: .pitch))
+        }
         self.effectsTemplateViewModels.append(EffectTemplateViewModel(type: .template, effects: transitionEffect))
+        self.effectsTemplateViewModels.append(EffectTemplateViewModel(type: .template, effects: transitionEffect2))
         self.addSubview(collectionView)
         
         collectionView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true

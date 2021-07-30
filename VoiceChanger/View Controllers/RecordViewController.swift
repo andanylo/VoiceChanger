@@ -38,13 +38,13 @@ class RecordViewController: UIViewController{
     
     ///View will disappear
     override func viewWillDisappear(_ animated: Bool) {
-        if voiceSound.fileExists{
+        if voiceSound.fileExists && !recorder.isRecording{
             delegate?.willSave(voiceSound: self.voiceSound)
         }
         if recorder.isRecording{
             let fileExists = voiceSound.fileExists
             recorder.stopRecording()
-            if !fileExists {
+            if fileExists {
                 try? voiceSound.removeSound()
             }
         }

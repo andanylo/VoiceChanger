@@ -134,10 +134,6 @@ class ListViewController: UIViewController {
         self.navigationItem.setRightBarButton(editButtonItem, animated: false)
         self.navigationController?.navigationBar.sizeToFit()
 
-//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-//        self.navigationController?.navigationBar.shadowImage = UIImage()
-//        self.navigationController?.navigationBar.isTranslucent = true
-
     }
     
     ///Layout the size of collection view cells
@@ -270,9 +266,20 @@ class ListViewController: UIViewController {
             Variables.shared.currentDeviceTheme = .normal
         }
         
-        collectionView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? UIColor.white : .init(white: 0.1, alpha: 1)
-        recordButton.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .black
+        collectionView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? UIColor.white : .black
+        recordButton.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
         recordButton.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
+        navigationController?.navigationBar.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .black
+        navigationController?.navigationBar.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
+        view.backgroundColor = navigationController?.navigationBar.backgroundColor
+        
+        
+        guard let cells = collectionView.visibleCells as? [VoiceSoundCell] else{
+            return
+        }
+        for i in cells{
+            i.setTheme()
+        }
     }
     override func viewWillAppear(_ animated: Bool) {
         setTheme()

@@ -62,6 +62,7 @@ class EffectTransition{
         guard let duration = fileDuration?() else{
             return 0.0
         }
+        
         return point.value * duration.returnSeconds()
     }
     

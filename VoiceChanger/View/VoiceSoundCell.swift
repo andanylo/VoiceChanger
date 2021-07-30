@@ -115,7 +115,7 @@ class VoiceSoundCell: UICollectionViewCell{
     func start(with voiceSoundCellModel: VoiceSoundCellModel?, isEditing: Bool){
         self.contentView.tag = 1
         
-        self.backgroundColor = .white
+        self.backgroundColor = .clear
         
         self.layer.cornerRadius = 10
         self.layer.shadowRadius = 3
@@ -181,6 +181,10 @@ class VoiceSoundCell: UICollectionViewCell{
     
     
   
+    func setTheme(){
+        self.contentView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
+    }
+    
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else{
             return

@@ -39,7 +39,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
     
     var prefferedHeight: CGFloat{
         get{
-            return popUpCategory == .record ? 336.5 : 400
+            return (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0.0) + (popUpCategory == .record ? 336.5 : 400)
         }
     }
     
@@ -140,6 +140,17 @@ class PopUpController: UIViewController, KeyboardDelegate{
         if view?.tag == 1{
             if KeyboardManager.shared.state == KeyboardManager.State.showed{
                 self.view.endEditing(true)
+            }
+            else if popUpCategory == .record && (containerViewController as? RecordViewController)?.recorder.isRecording == true{
+                let alert = UIAlertController(title: "Are you sure?", message: "You are about to leave the recording session, all recorded data will be unsaved.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Leave", style: .default, handler: { _ in
+                    DispatchQueue.main.async {
+                        self.dismiss(animated: true, completion: nil)
+                    }
+                }))
+                alert.addAction(UIAlertAction(title: "Stay", style: .cancel, handler: nil))
+                
+                self.present(alert, animated: true, completion: nil)
             }
             else{
                 self.dismiss(animated: true, completion: nil)

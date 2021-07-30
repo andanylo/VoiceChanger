@@ -97,7 +97,7 @@ class PlayerView: UIView{
         let effectsPicker = EffectsPicker()
         effectsPicker.translatesAutoresizingMaskIntoConstraints = false
         effectsPicker.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        effectsPicker.backgroundColor = .white
+        effectsPicker.backgroundColor = .clear
         return effectsPicker
     }()
     
