@@ -105,6 +105,12 @@ class RecorderView: UIView{
         
         changeStateOfRecordButton(isPlaying: false)
     }
+    
+    func setTheme(){
+        nameField.textColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
+        timerLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
+    }
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }

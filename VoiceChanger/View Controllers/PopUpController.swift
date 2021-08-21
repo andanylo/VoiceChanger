@@ -65,7 +65,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
         view.heightAnchor.constraint(equalToConstant: view.frame.size.height).isActive = true
         return view
     }()
-    var containerViewController: UIViewController?
+    var containerViewController: PopUpChildProtocol?
     var rootViewController: UIViewController?
     
     var objectToTransfer: AnyObject?
@@ -130,6 +130,18 @@ class PopUpController: UIViewController, KeyboardDelegate{
         containerViewController.view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
         containerViewController.view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
         self.addChild(containerViewController)
+        
+        setTheme()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        setTheme()
+    }
+    
+    func setTheme(){
+        mainView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
+        containerViewController?.setTheme()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

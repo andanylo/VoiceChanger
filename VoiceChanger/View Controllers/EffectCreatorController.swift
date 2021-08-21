@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class EffectCreatorController: UIViewController{
+class EffectCreatorController: UIViewController, PopUpChildProtocol{
     
     override func loadView() {
         self.view = UIView()
@@ -17,6 +17,10 @@ class EffectCreatorController: UIViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .white
+        self.view.backgroundColor = .clear
+        setTheme()
+    }
+    func setTheme() {
+       // self.view.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
     }
 }

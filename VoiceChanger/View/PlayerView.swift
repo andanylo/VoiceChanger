@@ -14,6 +14,8 @@ class PlayerView: UIView{
         }
     }
     
+    
+    
     ///Player slider
     private lazy var playerSlider: UISlider = {
         let slider = UISlider()
@@ -22,16 +24,7 @@ class PlayerView: UIView{
         slider.minimumTrackTintColor = UIColor.darkGray
         slider.heightAnchor.constraint(equalToConstant: slider.frame.height).isActive = true
         
-        let thumbView: UIView = UIView()
-        thumbView.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-        thumbView.backgroundColor = UIColor.darkGray
-        thumbView.layer.cornerRadius = thumbView.frame.width / 2
-        
-        let renderer = UIGraphicsImageRenderer(bounds: thumbView.bounds)
-        let image = renderer.image { rendererContext in
-            thumbView.layer.render(in: rendererContext.cgContext)
-        }
-        slider.setThumbImage(image, for: .normal)
+        slider.setThumbImage(getThumbImage(), for: .normal)
         
         slider.addTarget(self, action: #selector(didChangeValue(sender:)), for: .valueChanged)
         return slider
@@ -60,7 +53,7 @@ class PlayerView: UIView{
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        button.setImage(UIImage(named: "play"), for: .normal)
+        button.setImage(UIImage(named: "play")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.widthAnchor.constraint(equalToConstant: 35).isActive = true
         button.heightAnchor.constraint(equalToConstant: 35).isActive = true
@@ -81,7 +74,7 @@ class PlayerView: UIView{
     ///Options
     private lazy var options: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(named: "dots"), for: .normal)
+        button.setImage(UIImage(named: "dots")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.tintColor = .black
         button.translatesAutoresizingMaskIntoConstraints = false
         button.sizeToFit()
@@ -111,7 +104,7 @@ class PlayerView: UIView{
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-        button.setImage(UIImage(named: type == .forward ? "5secondskip" : "5skipback"), for: .normal)
+        button.setImage(UIImage(named: type == .forward ? "5secondskip" : "5skipback")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.widthAnchor.constraint(equalToConstant: 20).isActive = true
         button.heightAnchor.constraint(equalToConstant: 20).isActive = true
@@ -165,10 +158,10 @@ class PlayerView: UIView{
         playerViewModel.onPlayStateChange = { [weak self] isPlaying in
             DispatchQueue.main.async{
                 if isPlaying{
-                    self?.playButton.setImage(UIImage(named: "stop"), for: .normal)
+                    self?.playButton.setImage(UIImage(named: "stop")?.withRenderingMode(.alwaysTemplate), for: .normal)
                 }
                 else{
-                    self?.playButton.setImage(UIImage(named: "play"), for: .normal)
+                    self?.playButton.setImage(UIImage(named: "play")?.withRenderingMode(.alwaysTemplate), for: .normal)
                 }
             }
         }
@@ -228,6 +221,31 @@ class PlayerView: UIView{
         effectTemplatesView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         effectTemplatesView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
 
+        setTheme()
+    }
+    
+    func setTheme(){
+        playerSlider.minimumTrackTintColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .white
+        playerSlider.maximumTrackTintColor = Variables.shared.currentDeviceTheme == .normal ? .lightGray : .darkGray
+        playerSlider.setThumbImage(getThumbImage(), for: .normal)
+        [playButton, forwardButton, backButton, options].forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white})
+        [currentTimeLabel, remainingTimeLabel].forEach({$0.textColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .lightGray})
+        effectTemplatesView.setTheme()
+    }
+    
+    
+    ///Get image for player slider
+    func getThumbImage() -> UIImage{
+        let thumbView: UIView = UIView()
+        thumbView.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+        thumbView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .white
+        thumbView.layer.cornerRadius = thumbView.frame.width / 2
+        
+        let renderer = UIGraphicsImageRenderer(bounds: thumbView.bounds)
+        let image = renderer.image { rendererContext in
+            thumbView.layer.render(in: rendererContext.cgContext)
+        }
+        return image
     }
     
     init(playerViewModel: PlayerViewModel){

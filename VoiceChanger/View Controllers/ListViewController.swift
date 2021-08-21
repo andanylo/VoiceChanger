@@ -134,6 +134,8 @@ class ListViewController: UIViewController {
         self.navigationItem.setRightBarButton(editButtonItem, animated: false)
         self.navigationController?.navigationBar.sizeToFit()
 
+        
+        setTheme()
     }
     
     ///Layout the size of collection view cells
@@ -272,7 +274,7 @@ class ListViewController: UIViewController {
         navigationController?.navigationBar.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .black
         navigationController?.navigationBar.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
         view.backgroundColor = navigationController?.navigationBar.backgroundColor
-        
+        editButtonItem.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white
         
         guard let cells = collectionView.visibleCells as? [VoiceSoundCell] else{
             return

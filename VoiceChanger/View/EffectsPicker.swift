@@ -98,6 +98,14 @@ class EffectsPicker: UIView{
         collectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         
     }
+    
+    func setTheme(){
+        guard let cells = collectionView.visibleCells as? [EffectTemplateCell] else{
+            return
+        }
+        cells.forEach({$0.setTheme()})
+     }
+    
     override func didMoveToSuperview() {
         self.selectedEffectsTemplate = effectsTemplateViewModels.first(where: {$0.type == .template})
     }

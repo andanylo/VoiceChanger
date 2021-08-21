@@ -14,6 +14,17 @@ class EffectTemplateCell: UICollectionViewCell{
     
     private var addImage: UIButton?
     
+    private var selectedColor: UIColor{
+        get{
+            return Variables.shared.currentDeviceTheme == .normal ? UIColor(red: 0, green: 122/255, blue: 1, alpha: 1) : .white
+        }
+    }
+    private var standardColor: UIColor{
+        get{
+            return Variables.shared.currentDeviceTheme == .normal ? UIColor.lightGray : .init(red: 0.2, green: 0.2, blue: 0.2, alpha: 1)
+        }
+    }
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         self.contentView.layer.shadowPath = nil
@@ -34,7 +45,9 @@ class EffectTemplateCell: UICollectionViewCell{
             self.contentView.layer.shadowColor = UIColor.black.cgColor
             
             self.contentView.layer.borderWidth = effectTemplateViewModel.isSelected ? 3 : 0.5
-            self.contentView.layer.borderColor = effectTemplateViewModel.isSelected ? UIColor(red: 0, green: 122/255, blue: 1, alpha: 1).cgColor : UIColor.lightGray.cgColor
+            
+            self.contentView.layer.borderColor = effectTemplateViewModel.isSelected ? selectedColor.cgColor : standardColor.cgColor
+            
         }
         else{
             addImage = UIButton(type: .contactAdd)
@@ -47,20 +60,33 @@ class EffectTemplateCell: UICollectionViewCell{
             addImage?.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
             addImage?.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor).isActive = true
             addImage?.topAnchor.constraint(equalTo: self.contentView.topAnchor).isActive = true
+            
+            self.contentView.backgroundColor = .clear
         }
         
         
         self.backgroundColor = .clear
-        self.contentView.backgroundColor = .white
         
-        effectTemplateViewModel.didSelect = { bool in
+        effectTemplateViewModel.didSelect = { [weak self] bool in
             DispatchQueue.main.async {
+
                 if effectTemplateViewModel.type == .template{
-                    self.contentView.layer.borderWidth = effectTemplateViewModel.isSelected ? 3 : 0.5
-                    self.contentView.layer.borderColor = effectTemplateViewModel.isSelected ? UIColor(red: 0, green: 122/255, blue: 1, alpha: 1).cgColor : UIColor.lightGray.cgColor
+                    self?.contentView.layer.borderWidth = effectTemplateViewModel.isSelected ? 3 : 0.5
+                    self?.contentView.layer.borderColor = effectTemplateViewModel.isSelected ? self?.selectedColor.cgColor : self?.standardColor.cgColor
                 }
             }
         }
+        
+        setTheme()
+    }
+    
+    func setTheme(){
+        if self.contentView.backgroundColor != .clear{
+            self.contentView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .darkGray
+        }
+        
+        self.contentView.layer.borderColor = effectTemplateViewModel?.isSelected == true ? selectedColor.cgColor : standardColor.cgColor
+        addImage?.tintColor = Variables.shared.currentDeviceTheme == .normal ? .gray : .white
     }
 }
 

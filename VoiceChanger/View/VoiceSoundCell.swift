@@ -159,6 +159,7 @@ class VoiceSoundCell: UICollectionViewCell{
         
         self.voiceSoundCellModel = voiceSoundCellModel
         
+        setTheme()
     }
     
     
@@ -183,6 +184,9 @@ class VoiceSoundCell: UICollectionViewCell{
   
     func setTheme(){
         self.contentView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
+        nameLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
+        audioFileDurationLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .lightGray
+        playerView.setTheme()
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {

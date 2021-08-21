@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class RecordViewController: UIViewController{
+class RecordViewController: UIViewController, PopUpChildProtocol{
     
     var recorder = Recorder()
     lazy var voiceSound: VoiceSound = {
@@ -18,11 +18,17 @@ class RecordViewController: UIViewController{
     }()
     weak var delegate: RecordViewControllerDelegate?
     
+    var recorderView: RecorderView?{
+        get{
+            return self.view as? RecorderView
+        }
+    }
+    
     ///Returns the recorder  view with audio wave and record button
     override func loadView() {
         self.view = RecorderView(voiceSound: self.voiceSound)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .clear
     }
     
     override func viewDidLoad() {
@@ -34,6 +40,11 @@ class RecordViewController: UIViewController{
         self.view.layoutIfNeeded()
         
         recorder.recordTimer.delegate = self
+        setTheme()
+    }
+    
+    func setTheme(){
+        recorderView?.setTheme()
     }
     
     ///View will disappear
