@@ -27,6 +27,7 @@ class EffectTemplateCell: UICollectionViewCell{
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        self.contentView.backgroundColor = .white
         self.contentView.layer.shadowPath = nil
         self.contentView.layer.shadowRadius = 0
         self.contentView.layer.borderWidth = 0

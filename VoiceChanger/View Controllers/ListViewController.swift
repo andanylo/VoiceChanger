@@ -102,12 +102,24 @@ class ListViewController: UIViewController {
         super.viewDidLoad()
         
        
+        //Setup navigation bar
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationItem.title = "Voice records"
+        
+        self.navigationItem.largeTitleDisplayMode = .never
+        self.navigationItem.largeTitleDisplayMode = .always
+        self.navigationItem.searchController = searchController
+        
+        self.navigationItem.setRightBarButton(editButtonItem, animated: false)
+        self.navigationController?.navigationBar.sizeToFit()
+
+        
         voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0, listViewController: self)})
         
         
         self.view.addSubview(collectionView)
         
-        collectionView.topAnchor.constraint(equalTo:  self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        collectionView.topAnchor.constraint(equalTo:  self.view.topAnchor).isActive = true//self.view.safeAreaLayoutGuide.topAnchor
         collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
@@ -123,17 +135,6 @@ class ListViewController: UIViewController {
         
         self.view.layoutIfNeeded()
         
-        //Setup navigation bar
-        self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationItem.title = "Voice records"
-        
-        self.navigationItem.largeTitleDisplayMode = .never
-        self.navigationItem.largeTitleDisplayMode = .always
-        self.navigationItem.searchController = searchController
-        
-        self.navigationItem.setRightBarButton(editButtonItem, animated: false)
-        self.navigationController?.navigationBar.sizeToFit()
-
         
         setTheme()
     }
@@ -151,7 +152,7 @@ class ListViewController: UIViewController {
         let popUpController = PopUpController(rootViewController: self)
         popUpController.popUpCategory = type
         popUpController.objectToTransfer = objectToTransfer
-        popUpController.modalPresentationStyle = .overCurrentContext
+        popUpController.modalPresentationStyle = .overFullScreen
         Animator.shared.duration = 0.72
         popUpController.transitioningDelegate = self
         self.navigationController?.present(popUpController, animated: true, completion: nil)

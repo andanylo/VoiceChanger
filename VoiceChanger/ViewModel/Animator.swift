@@ -25,13 +25,12 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             return
         }
         
-        toView.isHidden = true
         toView.layoutIfNeeded()
+        transitionContext.containerView.backgroundColor = .clear
         transitionContext.containerView.addSubview(toView)
-        
-        
+
         let backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0 : 0.4)
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0.01 : 0.4)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         
         transitionContext.containerView.addSubview(backgroundView)
@@ -41,6 +40,9 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
         backgroundView.bottomAnchor.constraint(equalTo: transitionContext.containerView.bottomAnchor).isActive = true
         backgroundView.trailingAnchor.constraint(equalTo: transitionContext.containerView.trailingAnchor).isActive = true
         
+        var animation: (() -> Void)?
+        var completion: (() -> Void)?
+        var withSpring = false
         
         if firstController is ListViewController, let popUpViewController = secondController as? PopUpController{
             guard let recordView = popUpViewController.mainView.snapshotView(afterScreenUpdates: true) else{
@@ -48,22 +50,26 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
                 return
             }
             
-            transitionContext.containerView.addSubview(recordView)
+            
             
             let starterRect = CGRect(x: popUpViewController.mainView.frame.origin.x, y: UIScreen.main.bounds.height, width: popUpViewController.mainView.frame.width, height: popUpViewController.mainView.frame.height)
             let finalRect = popUpViewController.mainView.frame
             
             recordView.frame = presenting ? starterRect : finalRect
+            
+            transitionContext.containerView.addSubview(recordView)
             UIView.animate(withDuration: duration / 1.8) {
-                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self.presenting ? 0.4 : 0)
+                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self.presenting ? 0.4 : 0.01)
             }
-            UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: presenting ? 0.8 : 1, initialSpringVelocity: presenting ?  0.1 : 0, options: [.curveEaseOut], animations: {
-                recordView.frame = self.presenting ? finalRect : starterRect
-            }, completion: {_ in
+            animation = { [weak self] in
+                recordView.frame = self?.presenting == true ? finalRect : starterRect
+            }
+            completion = {
                 toView.isHidden = false
                 [backgroundView, recordView].forEach({$0.removeFromSuperview()})
                 transitionContext.completeTransition(true)
-            })
+            }
+            withSpring = true
         }
         else if firstController is ListViewController, let loadingViewController = secondController as? LoadingViewController{
             
@@ -83,16 +89,33 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             loadView.alpha = presenting ? 0 : 1
             
             let newScale: CGFloat = presenting ? 1 : 1.1
-            UIView.animate(withDuration: duration, delay: 0, options: []) {
-                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self.presenting ? 0.4 : 0)
+            animation = { [weak self] in
+                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self?.presenting == true ? 0.4 : 0)
                 loadView.transform = CGAffineTransform(scaleX: newScale, y: newScale)
-                loadView.alpha = self.presenting ? 1 : 0
-            } completion: { _ in
+                loadView.alpha = self?.presenting == true ? 1 : 0
+            }
+            completion = {
                 toView.isHidden = false
                 [backgroundView, loadView].forEach({$0.removeFromSuperview()})
                 transitionContext.completeTransition(true)
             }
+            withSpring = false
+        }
+        toView.isHidden = true
+        if withSpring{
+            UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: presenting ? 0.8 : 1, initialSpringVelocity: presenting ?  0.1 : 0, options: [.curveEaseOut]) {
+                animation?()
+            } completion: { _ in
+                completion?()
+            }
 
+        }
+        else{
+            UIView.animate(withDuration: duration, animations: {
+                animation?()
+            }) { _ in
+                completion?()
+            }
         }
     }
     

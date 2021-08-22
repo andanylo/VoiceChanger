@@ -103,6 +103,7 @@ class EffectsPicker: UIView{
         guard let cells = collectionView.visibleCells as? [EffectTemplateCell] else{
             return
         }
+        collectionView.reloadData()
         cells.forEach({$0.setTheme()})
      }
     
