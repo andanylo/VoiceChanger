@@ -20,7 +20,7 @@ class EffectPickerViewModel{
                 return
             }
             didPick?(effects)
-            
+
         }
     }
     

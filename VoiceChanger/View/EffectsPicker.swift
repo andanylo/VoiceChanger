@@ -60,7 +60,9 @@ class EffectsPicker: UIView{
     }
     
     override func didMoveToSuperview() {
-        self.effectPickerViewModel.selectedEffectsTemplate = self.effectPickerViewModel.effectsTemplateViewModels.first(where: {$0.type == .template})
+        if self.effectPickerViewModel.selectedEffectsTemplate == nil{
+            self.effectPickerViewModel.selectedEffectsTemplate = self.effectPickerViewModel.effectsTemplateViewModels.first(where: {$0.type == .template})
+        }
     }
     required init?(coder: NSCoder) {
         super.init(coder: coder)

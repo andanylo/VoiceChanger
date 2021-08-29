@@ -499,3 +499,13 @@ extension ListViewController: PlayerDelegate{
     }
     
 }
+
+
+extension UICollectionViewFlowLayout{
+    open override func layoutAttributesForInteractivelyMovingItem(at indexPath: IndexPath, withTargetPosition position: CGPoint) -> UICollectionViewLayoutAttributes {
+        let attributes = super.layoutAttributesForInteractivelyMovingItem(at: indexPath, withTargetPosition: position)
+        attributes.alpha = 0.75
+
+        return attributes
+    }
+}
