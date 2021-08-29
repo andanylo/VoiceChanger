@@ -18,8 +18,6 @@ class PlayerViewModel{
     
     var onClickOptionsButton: (() -> Void)?
     
-    var onEffectCreate: (() -> Void)?
-    
     ///Method that handles whenever the
     func didClickOnPlayButton(){
         guard let voiceSound = voiceSound else{
@@ -30,7 +28,7 @@ class PlayerViewModel{
         if Player.shared.currentVoiceSound?.playerState.isPlaying == true && Player.shared.currentVoiceSound?.fullPath != voiceSound.fullPath{
             Player.shared.stopPlaying(isPausing: false)
         }
-
+     
         if !voiceSound.playerState.isPlaying{
             do{
                 try Player.shared.playFile(voiceSound: voiceSound, at: sliderComponents)
@@ -105,22 +103,3 @@ class PlayerViewModel{
     }
 }
 
-///Inherit from protocol
-extension PlayerViewModel: EffectsPickerDelegate{
-    func didClickOnCreate() {
-        onEffectCreate?()
-    }
-    
-    ///Did pick effects
-    func didPick(effects: Effects) {
-        self.voiceSound?.effects = effects
-        Player.shared.audioNodes.setEffects(effects: effects)
-        
-        ///Set up effect transition change configuration to avaudonodes
-        if Player.shared.currentVoiceSound?.effects.effectTransitions.isEmpty == false && Player.shared.currentVoiceSound === self.voiceSound && voiceSound?.playerState.isPlaying == true{
-            self.voiceSound?.effects.currentValues.applyTransitionChanges = { effectPart in
-                Player.shared.audioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: effects)
-            }
-        }
-    }
-}

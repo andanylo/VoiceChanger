@@ -36,6 +36,7 @@ class EffectTemplateCell: UICollectionViewCell{
         addImage = nil
     }
     func start(effectTemplateViewModel: EffectTemplateViewModel){
+       
         self.contentView.layer.cornerRadius = effectTemplateViewModel.size.width / 2
         self.effectTemplateViewModel = effectTemplateViewModel
         if effectTemplateViewModel.type == .template{
@@ -44,9 +45,7 @@ class EffectTemplateCell: UICollectionViewCell{
             self.contentView.layer.shadowOffset = .zero
             self.contentView.layer.shadowOpacity = 0.3
             self.contentView.layer.shadowColor = UIColor.black.cgColor
-            
             self.contentView.layer.borderWidth = effectTemplateViewModel.isSelected ? 3 : 0.5
-            
             self.contentView.layer.borderColor = effectTemplateViewModel.isSelected ? selectedColor.cgColor : standardColor.cgColor
             
         }
@@ -67,16 +66,15 @@ class EffectTemplateCell: UICollectionViewCell{
         
         
         self.backgroundColor = .clear
-        
-        effectTemplateViewModel.didSelect = { [weak self] bool in
+        self.effectTemplateViewModel?.didSelect = { [weak self] bool in
             DispatchQueue.main.async {
-
                 if effectTemplateViewModel.type == .template{
                     self?.contentView.layer.borderWidth = effectTemplateViewModel.isSelected ? 3 : 0.5
                     self?.contentView.layer.borderColor = effectTemplateViewModel.isSelected ? self?.selectedColor.cgColor : self?.standardColor.cgColor
                 }
             }
         }
+        self.effectTemplateViewModel?.didSelect?(self.effectTemplateViewModel?.isSelected == true)
         
         setTheme()
     }
@@ -91,10 +89,3 @@ class EffectTemplateCell: UICollectionViewCell{
     }
 }
 
-
-//Inherit from device theme protocol
-extension EffectTemplateCell: ThemeColorChangable{
-    func didChangeTheme(newTheme: DeviceTheme) {
-        
-    }
-}

@@ -8,7 +8,7 @@
 import UIKit
 
 class ListViewController: UIViewController {
-    ///Table view
+    //MARK:- Table view
     private lazy var collectionView: UICollectionView = {
         let collectionViewLayout = UICollectionViewFlowLayout()
         let view = UICollectionView(frame: CGRect.zero, collectionViewLayout: collectionViewLayout)
@@ -29,7 +29,7 @@ class ListViewController: UIViewController {
     }()
     
     
-    ///Search controller
+    //MARK:- Search controller
     private lazy var searchController: UISearchController = {
         let searchControl = UISearchController(searchResultsController: nil)
         searchControl.searchResultsUpdater = self
@@ -40,7 +40,7 @@ class ListViewController: UIViewController {
         return searchControl
     }()
 
-    ///Record button
+    //MARK:- Record button
     private lazy var recordButton: UIButton = {
         let button = UIButton(frame: CGRect.zero)
         button.frame.size = CGSize(width: 50, height: 50)
@@ -61,19 +61,26 @@ class ListViewController: UIViewController {
         return button
     }()
     
-    ///Set editing method
+    //MARK:- Set editing method
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
+        changeSelected(voiceSoundCellModel: nil)
         guard let cells = collectionView.visibleCells as? [VoiceSoundCell] else{
             return
         }
+        
         for i in cells{
             i.didChangeEditingState(isEditing: self.isEditing)
         }
         
     }
 
+    var movableIndexPath: IndexPath?
     
+    lazy var longPressGesture: UILongPressGestureRecognizer = {
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction))
+        return gesture
+    }()
     
     var voiceSoundCellModels: [VoiceSoundCellModel] = []
     
@@ -96,7 +103,7 @@ class ListViewController: UIViewController {
             searchController.isActive = false
         }
     }
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -135,11 +142,15 @@ class ListViewController: UIViewController {
         
         self.view.layoutIfNeeded()
         
+        let safeViewBottom = UIScreen.main.bounds.height - recordButton.frame.minY
+        collectionView.contentInset.bottom = safeViewBottom + 10
         
         setTheme()
+        
+        collectionView.addGestureRecognizer(longPressGesture)
     }
     
-    ///Layout the size of collection view cells
+    //MARK:- Layout the size of collection view cells
     override func viewDidLayoutSubviews() {
         guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
             return
@@ -169,7 +180,7 @@ class ListViewController: UIViewController {
         presentPopUp(type: .record, objectToTransfer: objectToTransfer)
     }
     
-    ///Options for the voice sound
+    //MARK:- Options for the voice sound
     func presentOptions(voiceSound: VoiceSound){
         let options = UIAlertController(title: voiceSound.name, message: nil, preferredStyle: .actionSheet)
         options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
@@ -208,7 +219,9 @@ class ListViewController: UIViewController {
             DispatchQueue.main.async {
                 let renameAlert = UIAlertController(title: "Rename sound", message: "Enter the new name below", preferredStyle: .alert)
                 var alertTextField: UITextField?
-                renameAlert.addTextField { textField in
+                renameAlert.addTextField { [weak voiceSound] textField in
+                    textField.clearButtonMode = .always
+                    textField.text = voiceSound?.name
                     alertTextField = textField
                 }
                 renameAlert.addAction(UIAlertAction(title: "Confirm", style: .default, handler: { _ in
@@ -247,6 +260,53 @@ class ListViewController: UIViewController {
         self.navigationController?.present(options, animated: true, completion: nil)
     }
     
+    //MARK:- collection view rearrangement
+    func startMovement(){
+        guard let indexPath = collectionView.indexPathForItem(at: longPressGesture.location(in: longPressGesture.view)), self.isEditing else{
+            return
+        }
+        changeSelected(voiceSoundCellModel: nil)
+        movableIndexPath = indexPath
+        collectionView.beginInteractiveMovementForItem(at: indexPath)
+    }
+    func updateMovement(){
+        if movableIndexPath != nil{
+            collectionView.updateInteractiveMovementTargetPosition(longPressGesture.location(in: longPressGesture.view))
+        }
+    }
+    func endMovement(){
+        if movableIndexPath != nil{
+            collectionView.endInteractiveMovement()
+        }
+    }
+    func moveModel(from: Int, to: Int){
+        let object = voiceSoundCellModels[from]
+        voiceSoundCellModels.remove(at: from)
+        voiceSoundCellModels.insert(object, at: to)
+    }
+    func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        Variables.shared.recordList.move(from: sourceIndexPath.row, to: destinationIndexPath.row)
+        moveModel(from: sourceIndexPath.row, to: destinationIndexPath.row)
+    }
+    func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveFromItemAt originalIndexPath: IndexPath, toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
+        return proposedIndexPath
+    }
+  
+    func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    @objc func longPressAction(gesture: UILongPressGestureRecognizer){
+        switch gesture.state {
+        case .began:
+            startMovement()
+        case .changed:
+            updateMovement()
+        case .ended:
+            endMovement()
+        default:
+            break
+        }
+    }
     
     ///Did change theme of the application
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -254,7 +314,7 @@ class ListViewController: UIViewController {
         setTheme()
     }
     
-    ///Set theme for views
+    //MARK: Set theme for views
     func setTheme(){
         if #available(iOS 13.0, *) {
             
@@ -291,7 +351,7 @@ class ListViewController: UIViewController {
     
 }
 
-///Delegate for the search controller
+//MARK: Delegate for the search controller
 extension ListViewController: UISearchResultsUpdating{
     func updateSearchResults(for searchController: UISearchController) {
         DispatchQueue.main.async {
@@ -302,7 +362,7 @@ extension ListViewController: UISearchResultsUpdating{
     
 }
 
-///Collection view delegate and datasource
+//MARK: Collection view delegate and datasource
 extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return displayedVoiceSoundCellModels.count
@@ -318,7 +378,7 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
         return cell
     }
     
-    func changeSelected(voiceSoundCellModel: VoiceSoundCellModel){
+    func changeSelected(voiceSoundCellModel: VoiceSoundCellModel?){
         guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
             return
         }

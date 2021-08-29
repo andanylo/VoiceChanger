@@ -36,6 +36,12 @@ class RecordList{
         return newList
     }
     
+    func move(from: Int, to: Int){
+        let oldObject = list[from]
+        list.remove(at: from)
+        list.insert(oldObject, at: to)
+    }
+    
     ///Returns the object at index
     func returnObject(at index: Int) -> VoiceSound?{
         if index < list.count{

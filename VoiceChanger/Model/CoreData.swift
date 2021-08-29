@@ -40,10 +40,12 @@ class CoreData{
         }
         
         ///Append or change entities in the context
+        var iterationNumber: Int = 0
+        
         for sound in sounds{
             var newEntity: VoiceSoundEntity!
             if let entity = self.entities.first(where: {$0.lastPathComponent == sound.pathComponent}){
-                newEntity = entity
+                newEntity = entity.convertFromObject(object: sound) as? VoiceSoundEntity
             }
             else{
                 newEntity = VoiceSoundEntity(entity: voiceEntityDescription, insertInto: context)
@@ -51,6 +53,7 @@ class CoreData{
                 
                 self.entities.append(newEntity)
             }
+            newEntity.orderNumber = Int16(iterationNumber)
             
             if let entityEffect = newEntity.effects{
                 let effects = Effects(entity: entityEffect)
@@ -64,6 +67,7 @@ class CoreData{
                 newEntity.effects = effects
             }
             
+            iterationNumber += 1
         }
         
         ///Remove entities if needed
@@ -95,6 +99,13 @@ class CoreData{
             }
             
             removeNotSavedFiles(voiceRecords: voiceSounds)
+            
+            voiceSounds.sort(by: { first,second in
+                if let a = self.entities.first(where: {entity in entity.lastPathComponent == first.pathComponent})?.orderNumber, let b = self.entities.first(where: {entity in entity.lastPathComponent == second.pathComponent})?.orderNumber{
+                    return a < b
+                }
+                return false
+            })
             
             return voiceSounds
         }

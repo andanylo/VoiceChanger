@@ -140,6 +140,18 @@ class PopUpController: UIViewController, KeyboardDelegate{
     }
     
     func setTheme(){
+        if #available(iOS 13.0, *) {
+            
+            if self.traitCollection.userInterfaceStyle == .dark{
+                Variables.shared.currentDeviceTheme = .dark
+            }
+            else{
+                Variables.shared.currentDeviceTheme = .normal
+            }
+            
+        } else {
+            Variables.shared.currentDeviceTheme = .normal
+        }
         mainView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
         containerViewController?.setTheme()
     }

@@ -10,11 +10,9 @@ import UIKit
 class PlayerView: UIView{
     var playerViewModel: PlayerViewModel!{
         didSet{
-            setUp(playerViewModel: self.playerViewModel)
+            setUp(playerViewModel: playerViewModel)
         }
     }
-    
-    
     
     ///Player slider
     private lazy var playerSlider: UISlider = {
@@ -85,14 +83,6 @@ class PlayerView: UIView{
         return button
     }()
     
-    ///Returns  the effect templates view
-    private lazy var effectTemplatesView: EffectsPicker = {
-        let effectsPicker = EffectsPicker()
-        effectsPicker.translatesAutoresizingMaskIntoConstraints = false
-        effectsPicker.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        effectsPicker.backgroundColor = .clear
-        return effectsPicker
-    }()
     
     enum SkipButtonType{
         case forward
@@ -173,12 +163,12 @@ class PlayerView: UIView{
         
         playerViewModel.onSliderComponentChange = updateFromViewModel
         updateFromViewModel()
-        
-        effectTemplatesView.delegate = playerViewModel
     }
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(playerViewModel: PlayerViewModel) {
+        super.init(frame: CGRect.zero)
 
+        self.playerViewModel = playerViewModel
+        
         self.addSubview(playerSlider)
         
         playerSlider.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 35).isActive = true
@@ -215,13 +205,9 @@ class PlayerView: UIView{
         options.centerYAnchor.constraint(equalTo: playButton.centerYAnchor).isActive = true
         options.trailingAnchor.constraint(equalTo: playerSlider.trailingAnchor).isActive = true
         
-        self.addSubview(effectTemplatesView)
-        
-        effectTemplatesView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
-        effectTemplatesView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
-        effectTemplatesView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-
         setTheme()
+        
+        setUp(playerViewModel: self.playerViewModel)
     }
     
     func setTheme(){
@@ -230,7 +216,6 @@ class PlayerView: UIView{
         playerSlider.setThumbImage(getThumbImage(), for: .normal)
         [playButton, forwardButton, backButton, options].forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white})
         [currentTimeLabel, remainingTimeLabel].forEach({$0.textColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .lightGray})
-        effectTemplatesView.setTheme()
     }
     
     
@@ -247,8 +232,7 @@ class PlayerView: UIView{
         }
         return image
     }
-    
-    init(playerViewModel: PlayerViewModel){
+    init(){
         super.init(frame: CGRect.zero)
     }
     

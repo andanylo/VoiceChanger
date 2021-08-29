@@ -55,12 +55,10 @@ class VoiceSoundCell: UICollectionViewCell{
    
             
             nameLabel.text = voiceSoundCellModel?.name
-            
             audioFileDurationLabel.updateText(from: voiceSound.duration)
+            playerView.playerViewModel = voiceSoundCellModel?.playerViewModel
+            effectTemplatesView.effectPickerViewModel = voiceSoundCellModel?.effectPickerViewModel
             
-            if voiceSoundCellModel?.playerViewModel != nil{
-                playerView.playerViewModel = voiceSoundCellModel?.playerViewModel
-            }
            
             var rotationAngle: CGFloat = voiceSoundCellModel?.isSelected == true ? CGFloat.pi / 2 : 0
             disclosureIndicator.transform = CGAffineTransform(rotationAngle: rotationAngle)
@@ -91,9 +89,24 @@ class VoiceSoundCell: UICollectionViewCell{
     
     ///Player view
     private lazy var playerView: PlayerView = {
-        let view = PlayerView(frame: CGRect.zero)
+        guard let playerViewModel = voiceSoundCellModel?.playerViewModel else{
+            return PlayerView()
+        }
+        let view = PlayerView(playerViewModel: playerViewModel)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+    
+    ///Returns  the effect templates view
+    private lazy var effectTemplatesView: EffectsPicker = {
+        guard let effectPickerViewModel = voiceSoundCellModel?.effectPickerViewModel else{
+            return EffectsPicker()
+        }
+        let effectsPicker = EffectsPicker(effectPickerViewModel: effectPickerViewModel)
+        effectsPicker.translatesAutoresizingMaskIntoConstraints = false
+        effectsPicker.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        effectsPicker.backgroundColor = .clear
+        return effectsPicker
     }()
     
     
@@ -104,8 +117,6 @@ class VoiceSoundCell: UICollectionViewCell{
         
         leadingNameLabelConstraint?.isActive = false
         leadingNameLabelConstraint = nil
-
-        
     }
     
     @objc func removeAction(){
@@ -113,6 +124,8 @@ class VoiceSoundCell: UICollectionViewCell{
     }
     
     func start(with voiceSoundCellModel: VoiceSoundCellModel?, isEditing: Bool){
+
+        self.voiceSoundCellModel = voiceSoundCellModel
         self.contentView.tag = 1
         
         self.backgroundColor = .clear
@@ -150,14 +163,20 @@ class VoiceSoundCell: UICollectionViewCell{
         audioFileDurationLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5).isActive = true
         audioFileDurationLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor).isActive = true
         
+        self.contentView.addSubview(effectTemplatesView)
+        
+        effectTemplatesView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
+        effectTemplatesView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
+        effectTemplatesView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: (voiceSoundCellModel?.expandedHeight ?? 200) - (voiceSoundCellModel?.effectPickerViewModel?.height ?? 60)).isActive = true
+        
+        
         self.contentView.addSubview(playerView)
         
         playerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: voiceSoundCellModel?.defaultHeight ?? 50).isActive = true
-        playerView.heightAnchor.constraint(equalToConstant: (voiceSoundCellModel?.expandedHeight ?? 200) - (voiceSoundCellModel?.defaultHeight ?? 50)).isActive = true
+        playerView.bottomAnchor.constraint(equalTo: effectTemplatesView.topAnchor).isActive = true
         playerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
         playerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
         
-        self.voiceSoundCellModel = voiceSoundCellModel
         
         setTheme()
     }
@@ -187,6 +206,7 @@ class VoiceSoundCell: UICollectionViewCell{
         nameLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
         audioFileDurationLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .lightGray
         playerView.setTheme()
+        effectTemplatesView.setTheme()
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {

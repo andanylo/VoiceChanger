@@ -103,17 +103,19 @@ class Recorder{
 
             self.audioRecorder = try AVAudioRecorder(url: recordURL, settings: Recorder.settings)
             
+            self.delegate?.didStartRecording()
+            
             self.audioRecorder.prepareToRecord()
-            self.audioRecorder.record()
 
             self.audioRecorder.isMeteringEnabled = true
             
+            self.audioRecorder.record()
             voiceSoundToRecord = voiceSound
 
             self.recordTimer.reset()
             self.recordTimer.start()
 
-            self.delegate?.didStartRecording()
+            
         }
         catch{
             throw RecordingError.unexpexted(error)
@@ -125,8 +127,9 @@ class Recorder{
     ///Method that stops the recording
     func stopRecording(){
         
-        self.audioRecorder.stop()
         self.delegate?.didStopRecording()
+        
+        self.audioRecorder.stop()
         
         self.voiceSoundToRecord?.updateAudioFile()
         self.voiceSoundToRecord = nil
@@ -139,7 +142,8 @@ class Recorder{
     ///Returns current average power
     func averagePower() -> Float{
         self.audioRecorder.updateMeters()
-        return self.audioRecorder.averagePower(forChannel: 0)
+        let averagePower = self.audioRecorder.averagePower(forChannel: 0)
+        return averagePower
     }
     
     ///Enum for errors with starting recording
