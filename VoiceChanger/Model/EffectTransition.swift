@@ -104,6 +104,8 @@ class EffectTransition{
             return effect.currentValues.distortion
         case .reverb:
             return effect.currentValues.reverb
+        case .volume:
+            return effect.currentValues.volume
         case .none:
             return 0.0
         }

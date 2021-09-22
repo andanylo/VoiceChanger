@@ -50,11 +50,10 @@ class FileExporter{
         guard let cacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first, let file = exportAudioNodes.audioPlayer.file else{
             return
         }
-        
         //Schedule file
         self.exportAudioNodes.audioPlayer.scheduleFile(file, at: nil, completionHandler: nil)
         //Enable manual rendering mode
-        let maxNumberOfFrames: AVAudioFrameCount = 8
+        let maxNumberOfFrames: AVAudioFrameCount = 64
         try exportAudioNodes.audioEngine.enableManualRenderingMode(.offline, format: file.processingFormat, maximumFrameCount: maxNumberOfFrames)
         
         //Start engine
@@ -93,6 +92,7 @@ class FileExporter{
             switch status{
             case .success:
                 try newAudioFile.write(from: buffer)
+                
             default:
                 break
             }

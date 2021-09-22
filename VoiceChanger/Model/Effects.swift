@@ -22,24 +22,24 @@ class Effects: NSObject{
     var reverbPreset: AVAudioUnitReverbPreset?
     
     ///Initialize the structure with parameters
-    init(speed: Float, pitch: Float, distortion: Float, reverb: Float, distortionPreset: AVAudioUnitDistortionPreset?, reverbPreset: AVAudioUnitReverbPreset?){
-        self.standardValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb)
-        self.currentValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb)
+    init(speed: Float, pitch: Float, distortion: Float, reverb: Float, volume: Float, distortionPreset: AVAudioUnitDistortionPreset?, reverbPreset: AVAudioUnitReverbPreset?){
+        self.standardValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb, volume: volume)
+        self.currentValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb, volume: volume)
         
         self.distortionPreset = distortionPreset
         self.reverbPreset = reverbPreset
 
     }
-    init(speed: Float, pitch: Float, distortion: Float, reverb: Float){
-        self.standardValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb)
-        self.currentValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb)
+    init(speed: Float, pitch: Float, distortion: Float, reverb: Float, volume: Float){
+        self.standardValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb, volume: volume)
+        self.currentValues = EffectValues(speed: speed, pitch: pitch, distortion: distortion, reverb: reverb, volume: volume)
     }
     
     
     ///Initialize from an entity
     init(entity: EffectsEntity){
-        self.standardValues = EffectValues(speed: entity.speed, pitch: entity.pitch, distortion: entity.distortion, reverb: entity.reverb)
-        self.currentValues = EffectValues(speed: entity.speed, pitch: entity.pitch, distortion: entity.distortion, reverb: entity.reverb)
+        self.standardValues = EffectValues(speed: entity.speed, pitch: entity.pitch, distortion: entity.distortion, reverb: entity.reverb, volume: entity.volume)
+        self.currentValues = EffectValues(speed: entity.speed, pitch: entity.pitch, distortion: entity.distortion, reverb: entity.reverb, volume: entity.volume)
     }
     
     override init(){
@@ -56,6 +56,8 @@ class Effects: NSObject{
             self.currentValues.distortion = value
         case .reverb:
             self.currentValues.reverb = value
+        case .volume:
+            self.currentValues.volume = value
         }
     }
     
@@ -69,12 +71,14 @@ class Effects: NSObject{
             return self.standardValues.distortion
         case .reverb:
             return self.standardValues.reverb
+        case .volume:
+            return self.standardValues.volume
         }
     }
     
     ///Reset effects
     func resetEffects(){
-        self.currentValues = EffectValues(speed: self.standardValues.speed, pitch: self.standardValues.pitch, distortion: self.standardValues.distortion, reverb: self.standardValues.reverb)
+        self.currentValues = EffectValues(speed: self.standardValues.speed, pitch: self.standardValues.pitch, distortion: self.standardValues.distortion, reverb: self.standardValues.reverb, volume: self.standardValues.volume)
     }
     ///Expected value at seconds
     func expectedValue(for effect: EffectPart, at seconds: Double) -> Float{
@@ -122,6 +126,7 @@ enum EffectPart: CaseIterable{
     case pitch
     case distortion
     case reverb
+    case volume
 }
 
 
@@ -135,6 +140,7 @@ extension EffectsEntity: Entity{
         self.pitch = effects.standardValues.pitch
         self.distortion = effects.standardValues.distortion
         self.reverb = effects.standardValues.reverb
+        self.volume = effects.standardValues.volume
         return self
     }
 }

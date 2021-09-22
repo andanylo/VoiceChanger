@@ -15,7 +15,6 @@ class AudioNodes{
     var pitchAndSpeedNode: AVAudioUnitTimePitch
     var distortionNode: AVAudioUnitDistortion
     var reverbNode: AVAudioUnitReverb
-
     func setEffects(effects: Effects?){
         let soundEffects = effects ?? Effects()
         
@@ -69,6 +68,8 @@ class AudioNodes{
             self.distortionNode.wetDryMix = effects.currentValues.distortion
         case .reverb:
             self.reverbNode.wetDryMix = effects.currentValues.reverb
+        case .volume:
+            self.audioPlayer.volume = effects.currentValues.volume
         }
     }
 }

@@ -98,6 +98,7 @@ class ListViewController: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
+        
         UIView.performWithoutAnimation {
             searchController.isActive = true
             searchController.isActive = false
@@ -127,8 +128,8 @@ class ListViewController: UIViewController {
         self.view.addSubview(collectionView)
         
         collectionView.topAnchor.constraint(equalTo:  self.view.topAnchor).isActive = true//self.view.safeAreaLayoutGuide.topAnchor
-        collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-        collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        collectionView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
        
         self.view.backgroundColor = .white
@@ -163,7 +164,7 @@ class ListViewController: UIViewController {
         let popUpController = PopUpController(rootViewController: self)
         popUpController.popUpCategory = type
         popUpController.objectToTransfer = objectToTransfer
-        popUpController.modalPresentationStyle = .overFullScreen
+        popUpController.modalPresentationStyle = .overCurrentContext
         Animator.shared.duration = 0.72
         popUpController.transitioningDelegate = self
         self.navigationController?.present(popUpController, animated: true, completion: nil)
@@ -191,7 +192,7 @@ class ListViewController: UIViewController {
             Animator.shared.duration = 0.4
             self.navigationController?.present(loadingViewController, animated: true, completion: nil)
             
-            DispatchQueue.global(qos: .background).async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 do{
                     try FileExporter.shared.exportFile(voiceSound: voiceSound, completion: { url in
                         DispatchQueue.main.async {
@@ -397,7 +398,7 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let displayedModels = displayedVoiceSoundCellModels
-        return CGSize(width: self.view.frame.width - displayedModels[indexPath.row].edges.left - displayedModels[indexPath.row].edges.right, height: displayedModels[indexPath.row].height)
+        return CGSize(width: self.collectionView.frame.width - displayedModels[indexPath.row].edges.left - displayedModels[indexPath.row].edges.right, height: displayedModels[indexPath.row].height)
     }
     
     ///Delete the cell with model and view model

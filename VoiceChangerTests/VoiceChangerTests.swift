@@ -64,7 +64,7 @@ class VoiceChangerTests: XCTestCase {
         for i in 0...10{
             effectTransition.changeEffect(currentPlayerTime: Double(i), updateInterval: 1)
         }
-        XCTAssertEqual(Int(effect.speed), 2)
+        XCTAssertEqual(Int(effect.currentValues.speed), 2)
     }
     
     func testExpectedEffect(){
@@ -83,8 +83,13 @@ class VoiceChangerTests: XCTestCase {
         let value3 = effect.expectedValue(for: .speed, at: 7) // 1.5
         let value4 = effect.expectedValue(for: .speed, at: 9) // 1
         
-        XCTAssertTrue(value1 == 1.5 && value2 == 2.0 && value3 == 1.5 && value4 == 1)
+        XCTAssert(value1 == 1.5)
+        XCTAssert(value2 == 2.0)
+        XCTAssert(value3 == 1.5)
+        XCTAssert(value4 == 1)
     }
+    
+    
     
     
 

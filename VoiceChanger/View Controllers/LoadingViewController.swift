@@ -15,10 +15,28 @@ class LoadingViewController: UIViewController{
     lazy var loadingView: LoadingView = {
         var view = LoadingView(frame: CGRect.zero)
         view.loadingViewModel = loadingViewModel
-        view.backgroundColor = .white
+        view.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
         return view
     }()
-    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        setTheme()
+    }
+    func setTheme(){
+        if #available(iOS 13.0, *) {
+            
+            if self.traitCollection.userInterfaceStyle == .dark{
+                Variables.shared.currentDeviceTheme = .dark
+            }
+            else{
+                Variables.shared.currentDeviceTheme = .normal
+            }
+            
+        } else {
+            Variables.shared.currentDeviceTheme = .normal
+        }
+        loadingView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

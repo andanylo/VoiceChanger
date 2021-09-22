@@ -5,6 +5,7 @@
         <attribute name="pitch" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="reverb" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="speed" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="volume" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
     </entity>
     <entity name="VoiceSoundEntity" representedClassName="VoiceSoundEntity" syncable="YES" codeGenerationType="class">
         <attribute name="lastPathComponent" attributeType="String"/>
@@ -13,7 +14,7 @@
         <relationship name="effects" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EffectsEntity"/>
     </entity>
     <elements>
-        <element name="EffectsEntity" positionX="-54" positionY="0" width="128" height="103"/>
+        <element name="EffectsEntity" positionX="-54" positionY="0" width="128" height="104"/>
         <element name="VoiceSoundEntity" positionX="-63" positionY="-18" width="128" height="89"/>
     </elements>
 </model>

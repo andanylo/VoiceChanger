@@ -177,8 +177,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
                 self.present(alert, animated: true, completion: nil)
             }
             else{
-                    self.dismiss(animated: true, completion: nil)
-
+                self.dismiss(animated: true, completion: nil)
                 
             }
             

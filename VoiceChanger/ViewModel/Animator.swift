@@ -25,12 +25,14 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             return
         }
         
+      
+        toView.isHidden = true
         toView.layoutIfNeeded()
-        transitionContext.containerView.backgroundColor = .clear
         transitionContext.containerView.addSubview(toView)
-
+        transitionContext.containerView.sendSubviewToBack(toView)
+        
         let backgroundView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0.01 : 0.4)
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(presenting ? 0 : 0.4)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         
         transitionContext.containerView.addSubview(backgroundView)
@@ -45,12 +47,17 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
         var withSpring = false
         
         if firstController is ListViewController, let popUpViewController = secondController as? PopUpController{
-            guard let recordView = popUpViewController.mainView.snapshotView(afterScreenUpdates: true) else{
-                transitionContext.completeTransition(true)
-                return
+
+            let recordView = UIView()
+            recordView.layer.cornerRadius = popUpViewController.mainView.layer.cornerRadius
+            recordView.backgroundColor = popUpViewController.mainView.backgroundColor
+            
+            let renderer = UIGraphicsImageRenderer(bounds: popUpViewController.mainView.bounds)
+            let image = renderer.image { rendererContext in
+                popUpViewController.mainView.layer.render(in: rendererContext.cgContext)
             }
-            
-            
+            let imageView = UIImageView(image: image)
+            recordView.addSubview(imageView)
             
             let starterRect = CGRect(x: popUpViewController.mainView.frame.origin.x, y: UIScreen.main.bounds.height, width: popUpViewController.mainView.frame.width, height: popUpViewController.mainView.frame.height)
             let finalRect = popUpViewController.mainView.frame
@@ -59,15 +66,15 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             
             transitionContext.containerView.addSubview(recordView)
             UIView.animate(withDuration: duration / 1.8) {
-                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self.presenting ? 0.4 : 0.01)
+                backgroundView.backgroundColor = UIColor.black.withAlphaComponent(self.presenting ? 0.4 : 0)
             }
             animation = { [weak self] in
                 recordView.frame = self?.presenting == true ? finalRect : starterRect
             }
             completion = {
-                toView.isHidden = false
                 [backgroundView, recordView].forEach({$0.removeFromSuperview()})
                 transitionContext.completeTransition(true)
+                toView.isHidden = false
             }
             withSpring = true
         }
@@ -75,7 +82,7 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             
             let loadView = LoadingView(frame: loadingViewController.loadingView.frame)
             loadView.translatesAutoresizingMaskIntoConstraints = true
-            loadView.backgroundColor = .white
+            loadView.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .white : .init(white: 0.1, alpha: 1)
             transitionContext.containerView.addSubview(loadView)
             
             loadView.loadingViewModel = LoadingViewModel()
@@ -101,7 +108,7 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             }
             withSpring = false
         }
-        toView.isHidden = true
+        
         if withSpring{
             UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: presenting ? 0.8 : 1, initialSpringVelocity: presenting ?  0.1 : 0, options: [.curveEaseOut]) {
                 animation?()
