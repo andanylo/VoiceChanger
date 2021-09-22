@@ -20,7 +20,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
                 extendedByKeyboard = extendedByKeyboard ? false : true
                 
                 let difference = nameFieldMaxY - keyboardMinY + 20
-                mainTopConstraint.constant = state == KeyboardManager.State.showed ? topMainConstant - difference : topMainConstant
+                yConstraint.constant = state == KeyboardManager.State.showed ? yConstant - difference : yConstant
                 UIView.animate(withDuration: keyboardAnimationDuration) {
                     self.view.layoutIfNeeded()
                 }
@@ -70,8 +70,8 @@ class PopUpController: UIViewController, KeyboardDelegate{
     
     var objectToTransfer: AnyObject?
     
-    private var topMainConstant: CGFloat = 50
-    private var mainTopConstraint: NSLayoutConstraint!
+    private var yConstraint: NSLayoutConstraint!
+    private var yConstant: CGFloat = 0
     
     
     init(rootViewController: UIViewController?){
@@ -94,11 +94,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
         
         KeyboardManager.shared.delegate = self
         
-        topMainConstant = -prefferedHeight
-        
-        mainView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        mainTopConstraint = mainView.topAnchor.constraint(equalTo: self.view.bottomAnchor, constant: topMainConstant)
-        mainTopConstraint.isActive = true
+        setConstraints()
         
         mainView.addSubview(containerView)
         
@@ -132,6 +128,23 @@ class PopUpController: UIViewController, KeyboardDelegate{
         self.addChild(containerViewController)
         
         setTheme()
+    }
+    
+    func setConstraints(){
+        mainView.frame.size = UIDevice.current.model.contains("iPad") ? CGSize(width: prefferedHeight, height: prefferedHeight) : UIScreen.main.bounds.size
+        
+        mainView.widthAnchor.constraint(equalToConstant: mainView.frame.width).isActive = true
+        mainView.heightAnchor.constraint(equalToConstant: mainView.frame.height).isActive = true
+        mainView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        
+        yConstant = UIDevice.current.model.contains("iPad") ? 0 : -prefferedHeight
+        if UIDevice.current.model.contains("iPad"){
+            yConstraint = mainView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: yConstant)
+        }
+        else{
+            yConstraint = mainView.topAnchor.constraint(equalTo: self.view.bottomAnchor, constant: yConstant)
+        }
+        yConstraint.isActive = true
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

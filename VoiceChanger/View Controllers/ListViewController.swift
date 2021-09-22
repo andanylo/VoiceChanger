@@ -82,6 +82,12 @@ class ListViewController: UIViewController {
         return gesture
     }()
     
+    var numberOfVoiceSoundsInLine: Int {
+        get{
+            return UIDevice.current.model == "iPad" ? 3 : 1
+        }
+    }
+    
     var voiceSoundCellModels: [VoiceSoundCellModel] = []
     
     ///Returns array of voice sound cell models, that needs to be displayed, including searchbar text
@@ -398,7 +404,8 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let displayedModels = displayedVoiceSoundCellModels
-        return CGSize(width: self.collectionView.frame.width - displayedModels[indexPath.row].edges.left - displayedModels[indexPath.row].edges.right, height: displayedModels[indexPath.row].height)
+        let width = self.collectionView.frame.width / CGFloat(numberOfVoiceSoundsInLine)
+        return CGSize(width: width - displayedModels[indexPath.row].edges.left - displayedModels[indexPath.row].edges.right, height: displayedModels[indexPath.row].height)
     }
     
     ///Delete the cell with model and view model
