@@ -52,8 +52,6 @@ class PopUpController: UIViewController, KeyboardDelegate{
         view.backgroundColor = .white
         view.layer.cornerRadius = 45
         view.clipsToBounds = true
-        view.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
-        view.heightAnchor.constraint(equalToConstant: view.frame.height).isActive = true
         return view
     }()
     

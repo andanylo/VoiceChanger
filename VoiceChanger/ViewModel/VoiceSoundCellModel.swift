@@ -22,6 +22,8 @@ class VoiceSoundCellModel{
     
     var effectPickerViewModel: EffectPickerViewModel?
     
+    
+    
     ///Returns the name of the cell
     var name: String?{
         get{
@@ -31,8 +33,18 @@ class VoiceSoundCellModel{
     
     weak var listViewController: ListViewController?
     
+    ///Width of the cell
+    var width: CGFloat?{
+        get{
+            guard let width = listViewController?.view.frame.width, let numberInLine = listViewController?.numberOfItemsInLine() else{
+                return nil
+            }
+            return (width / CGFloat(numberInLine)) - edges.left - edges.right
+        }
+    }
+    
     ///Height of the cell
-    var defaultHeight: CGFloat = 60
+    let defaultHeight: CGFloat = 60
     var expandedHeight: CGFloat{
         get{
             return 210

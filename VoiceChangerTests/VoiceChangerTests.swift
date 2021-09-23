@@ -37,8 +37,8 @@ class VoiceChangerTests: XCTestCase {
         }))
     }
     func testEffects(){
-        let effect1 = Effects(speed: 1, pitch: 2, distortion: 3, reverb: 4)
-        let effect2 = Effects(speed: 1, pitch: 2, distortion: 3, reverb: 4)
+        let effect1 = Effects(speed: 1, pitch: 2, distortion: 3, reverb: 4, volume: 1)
+        let effect2 = Effects(speed: 1, pitch: 2, distortion: 3, reverb: 4, volume: 1)
         XCTAssertTrue(effect1.isEqual(effect2))
     }
     func testTimerLabelModel(){
@@ -55,7 +55,7 @@ class VoiceChangerTests: XCTestCase {
     }
     
     func testEffectTransition(){
-        let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
+        let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0, volume: 1)
         let effectTransition = EffectTransition(effects: effect, startPoint: .custom(2/10), endPoint: .custom(7/10), fromValue: 1, transitionValue: 2, effectPartToTransition: .speed)
         effect.effectTransitions = [effectTransition]
         effectTransition.fileDuration = {
@@ -68,7 +68,7 @@ class VoiceChangerTests: XCTestCase {
     }
     
     func testExpectedEffect(){
-        let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0)
+        let effect: Effects = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0, volume: 1)
         let effectTransition1 = EffectTransition(effects: effect, startPoint: .custom(2/10), endPoint: .custom(4/10), fromValue: 1, transitionValue: 2, effectPartToTransition: .speed)
         let effectTransition2 = EffectTransition(effects: effect, startPoint: .custom(6/10), endPoint: .custom(8/10), fromValue: 2, transitionValue: 1, effectPartToTransition: .speed)
         effect.effectTransitions = [effectTransition1, effectTransition2]

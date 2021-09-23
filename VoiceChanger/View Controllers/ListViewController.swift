@@ -10,7 +10,8 @@ import UIKit
 class ListViewController: UIViewController {
     //MARK:- Table view
     private lazy var collectionView: UICollectionView = {
-        let collectionViewLayout = UICollectionViewFlowLayout()
+        let collectionViewLayout = CollectionViewFlowLayout()
+        collectionViewLayout.delegate = self
         let view = UICollectionView(frame: CGRect.zero, collectionViewLayout: collectionViewLayout)
         view.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
         view.register(VoiceSoundCell.self, forCellWithReuseIdentifier: "VoiceSoundCell")
@@ -21,7 +22,6 @@ class ListViewController: UIViewController {
         view.allowsMultipleSelection = false
         view.allowsSelectionDuringEditing = false
         view.backgroundColor = UIColor.lightGray
-        view.contentInset = UIEdgeInsets.init(top: 10, left: 10, bottom: 10, right: 10)
         view.backgroundColor = UIColor(red: 242 / 255, green: 242 / 255, blue: 247 / 255, alpha: 1)
         view.showsHorizontalScrollIndicator = false
         view.showsVerticalScrollIndicator = false
@@ -75,20 +75,24 @@ class ListViewController: UIViewController {
         
     }
 
-    var movableIndexPath: IndexPath?
+    private var movableIndexPath: IndexPath?
     
-    lazy var longPressGesture: UILongPressGestureRecognizer = {
+    
+    private lazy var longPressGesture: UILongPressGestureRecognizer = {
         let gesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressAction))
         return gesture
     }()
     
+    ///Returns the minimum width of the cell
+    private let minimumWidth: CGFloat = 300.0
+    
     var numberOfVoiceSoundsInLine: Int {
         get{
-            return UIDevice.current.model == "iPad" ? 3 : 1
+            return UIDevice.current.model == "iPad" ? min(3, Int(collectionView.frame.width / minimumWidth)) : 1
         }
     }
     
-    var voiceSoundCellModels: [VoiceSoundCellModel] = []
+    private var voiceSoundCellModels: [VoiceSoundCellModel] = []
     
     ///Returns array of voice sound cell models, that needs to be displayed, including searchbar text
     var displayedVoiceSoundCellModels: [VoiceSoundCellModel]{
@@ -159,13 +163,15 @@ class ListViewController: UIViewController {
     
     //MARK:- Layout the size of collection view cells
     override func viewDidLayoutSubviews() {
-        guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
+        guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? CollectionViewFlowLayout else{
             return
         }
         collectionViewFlowLayout.invalidateLayout()
         collectionViewFlowLayout.minimumLineSpacing = 10
         collectionView.layoutIfNeeded()
     }
+    
+    //MARK: - Present popup view controller
     func presentPopUp(type: PopUpController.PopUpCategory, objectToTransfer: AnyObject?){
         let popUpController = PopUpController(rootViewController: self)
         popUpController.popUpCategory = type
@@ -370,7 +376,7 @@ extension ListViewController: UISearchResultsUpdating{
 }
 
 //MARK: Collection view delegate and datasource
-extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, FlowLayoutDelegate{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return displayedVoiceSoundCellModels.count
     }
@@ -384,9 +390,15 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
         
         return cell
     }
+    func collectionView(_ collectionView: UICollectionView, layout: UICollectionViewLayout, edgesForItemAt indexPath: IndexPath) -> UIEdgeInsets{
+        return displayedVoiceSoundCellModels[indexPath.row].edges
+    }
+    func numberOfItemsInLine() -> Int{
+        return self.numberOfVoiceSoundsInLine
+    }
     
     func changeSelected(voiceSoundCellModel: VoiceSoundCellModel?){
-        guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else{
+        guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? CollectionViewFlowLayout else{
             return
         }
 
@@ -395,7 +407,7 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
                 $0.isSelected = false
             }
         })
-        
+
         collectionView.performBatchUpdates {
 
         } completion: { (_) in
@@ -404,9 +416,11 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let displayedModels = displayedVoiceSoundCellModels
-        let width = self.collectionView.frame.width / CGFloat(numberOfVoiceSoundsInLine)
-        return CGSize(width: width - displayedModels[indexPath.row].edges.left - displayedModels[indexPath.row].edges.right, height: displayedModels[indexPath.row].height)
+       
+        
+        return CGSize(width: displayedModels[indexPath.row].width ?? 0.0, height: displayedModels[indexPath.row].height)
     }
+    
     
     ///Delete the cell with model and view model
     func collectionViewDeleteAction(cell: UICollectionViewCell?){
@@ -509,11 +523,3 @@ extension ListViewController: PlayerDelegate{
 }
 
 
-extension UICollectionViewFlowLayout{
-    open override func layoutAttributesForInteractivelyMovingItem(at indexPath: IndexPath, withTargetPosition position: CGPoint) -> UICollectionViewLayoutAttributes {
-        let attributes = super.layoutAttributesForInteractivelyMovingItem(at: indexPath, withTargetPosition: position)
-        attributes.alpha = 0.75
-
-        return attributes
-    }
-}
