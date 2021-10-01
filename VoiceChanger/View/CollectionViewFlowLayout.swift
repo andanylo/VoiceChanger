@@ -29,7 +29,7 @@ class CollectionViewFlowLayout: UICollectionViewFlowLayout{
     
     override func prepare() {
         super.prepare()
-        guard UIDevice.current.model.contains("iPad"), let collectionView = collectionView else{
+        guard let collectionView = collectionView else{
             return
         }
         attributes = []

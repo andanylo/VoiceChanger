@@ -16,7 +16,7 @@ class CustomTimer{
     var isRunning = false
     
     ///Update current components
-    var currTime: Int = 0{
+    private var currTime: Int = 0{
         didSet{
             self.timeComponents.convertFromMiliseconds(miliseconds: currTime)
         }

@@ -13,9 +13,11 @@ class EffectTemplateViewModel{
         case empty
         case template
     }
-    
+    ///Effect associated with template
     var effects: Effects?
+    
     var type: ViewModelType
+    ///Image name for template
     var imageName: String?
     var size: CGSize{
         get{
@@ -33,8 +35,9 @@ class EffectTemplateViewModel{
     ///On selection state change
     var didSelect: ((Bool) -> Void)?
     
-    init(type: ViewModelType, effects: Effects?){
+    init(type: ViewModelType, effects: Effects?, imageName: String){
         self.type = type
         self.effects = effects
+        self.imageName = imageName
     }
 }

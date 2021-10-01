@@ -12,7 +12,16 @@ import UIKit
 class EffectTemplateCell: UICollectionViewCell{
     var effectTemplateViewModel: EffectTemplateViewModel?
     
+    
     private var addImage: UIButton?
+    
+    ///Image view for a cell
+    private var imageView: UIImageView = {
+        let view = UIImageView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.contentMode = .scaleAspectFit
+        return view
+    }()
     
     private var selectedColor: UIColor{
         get{
@@ -32,6 +41,7 @@ class EffectTemplateCell: UICollectionViewCell{
         self.contentView.layer.shadowRadius = 0
         self.contentView.layer.borderWidth = 0
         self.contentView.layer.borderColor = nil
+        imageView.image = nil
         addImage?.removeFromSuperview()
         addImage = nil
     }
@@ -64,7 +74,18 @@ class EffectTemplateCell: UICollectionViewCell{
             self.contentView.backgroundColor = .clear
         }
         
-        
+        ///Setup image view
+        if imageView.superview == nil{
+            
+            self.contentView.addSubview(imageView)
+            imageView.topAnchor.constraint(equalTo: self.contentView.topAnchor).isActive = true
+            imageView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor).isActive = true
+            imageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
+            imageView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
+        }
+        if let imageName = self.effectTemplateViewModel?.imageName{
+            imageView.image = UIImage(named: imageName)?.withAlignmentRectInsets(.init(top: -8, left: -8, bottom: -8, right: -8))
+        }
         self.backgroundColor = .clear
         self.effectTemplateViewModel?.didSelect = { [weak self] bool in
             DispatchQueue.main.async {

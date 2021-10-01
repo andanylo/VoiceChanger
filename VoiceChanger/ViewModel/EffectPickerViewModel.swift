@@ -24,6 +24,8 @@ class EffectPickerViewModel{
         }
     }
     
+    let imageNames: [String] = ["", "drunk", "", "", "", "", "", "", "", "", "", "", "", "", "", "",]
+    
     var didPick: ((Effects) -> Void)?
     var didClickOnCreate: (() -> Void)?
     
@@ -54,7 +56,9 @@ class EffectPickerViewModel{
         
         
         
-        self.effectsTemplateViewModels = effects.map({return EffectTemplateViewModel(type: .template, effects: $0)})
+        self.effectsTemplateViewModels = effects.enumerated().map({ num, effect in
+            return EffectTemplateViewModel(type: .template, effects: effect, imageName: imageNames[num])})
+       
     }
     
     func effectMakeRepeatTransitions(effect: Effects, interval: Double, firstValue: Float, secondValue: Float, voiceSoundDuration: Double, effectPart: EffectPart){
