@@ -36,6 +36,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
     var popUpCategory: PopUpCategory!
     
     var dismissesOnTouch = true
+
     
     var prefferedHeight: CGFloat{
         get{
@@ -82,6 +83,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+
         
         self.view.tag = 1
         
@@ -109,6 +111,9 @@ class PopUpController: UIViewController, KeyboardDelegate{
             
             if let voiceSound = objectToTransfer as? VoiceSound{
                 recordViewController.voiceSound = voiceSound
+            }
+            else{
+                recordViewController.isRerecording = true
             }
         }
         else if popUpCategory == .effect{
@@ -188,6 +193,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
                 self.present(alert, animated: true, completion: nil)
             }
             else{
+                
                 self.dismiss(animated: true, completion: nil)
                 
             }

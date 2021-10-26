@@ -38,7 +38,7 @@ class Recorder{
     
     private var audioRecorder: AVAudioRecorder!
     
-    ///Record timer to count how many seconds/minutes/miliseconds has been recordec
+    ///Record timer to count how many seconds/minutes/miliseconds has been recorded
     var recordTimer: CustomTimer = CustomTimer(timeInterval: 0.001)
     
     ///State of the recorder

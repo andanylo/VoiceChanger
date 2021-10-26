@@ -24,6 +24,9 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
         }
     }
     
+    var isRerecording: Bool = false
+    var startedRecording: Bool = false
+    
     ///Returns the recorder  view with audio wave and record button
     override func loadView() {
         self.view = RecorderView(voiceSound: self.voiceSound)
@@ -33,6 +36,8 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        startedRecording = false
         
         recorder.delegate = self
         
@@ -49,22 +54,28 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
     
     ///View will disappear
     override func viewWillDisappear(_ animated: Bool) {
-        if voiceSound.fileExists && !recorder.isRecording{
-            delegate?.willSave(voiceSound: self.voiceSound)
-        }
-        if recorder.isRecording{
-            let fileExists = voiceSound.fileExists
-            recorder.stopRecording()
-            if fileExists {
-                try? voiceSound.removeSound()
+        
+        if startedRecording && !isRerecording{
+            if voiceSound.fileExists && !recorder.isRecording && isRerecording{
+                delegate?.willSave(voiceSound: self.voiceSound)
+            }
+            if recorder.isRecording{
+                let fileExists = voiceSound.fileExists
+                recorder.stopRecording()
+                if fileExists {
+                    try? voiceSound.removeSound()
+                }
             }
         }
+        
+        
     }
     
 }
 
 extension RecordViewController: RecorderDelegate{
     func didStartRecording() {
+        self.startedRecording = true
         DispatchQueue.main.async {
             (self.view as? RecorderView)?.changeStateOfRecordButton(isPlaying: true)
         }

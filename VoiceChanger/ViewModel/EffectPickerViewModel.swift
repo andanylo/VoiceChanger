@@ -24,7 +24,7 @@ class EffectPickerViewModel{
         }
     }
     
-    let imageNames: [String] = ["", "drunk", "", "", "", "", "", "", "", "", "", "", "", "", "", "",]
+    let imageNames: [String] = ["audio", "drunk", "robot", "smallRobot", "", "alien", "", "devil", "balloon", "snail", "", "", "", "", "", "",]
     
     var didPick: ((Effects) -> Void)?
     var didClickOnCreate: (() -> Void)?
@@ -88,14 +88,14 @@ class EffectPickerViewModel{
         ///Canyon
         Effects(speed: 1, pitch: 0, distortion: 100, reverb: 5, volume: 1, distortionPreset: .multiEcho2, reverbPreset: .cathedral),
         ///Scary/devil
-        Effects(speed: 0.8, pitch: -1000, distortion: 0, reverb: 0, volume: 1),
+        Effects(speed: 0.8, pitch: -800, distortion: 0, reverb: 0, volume: 1),
         ///helium
         Effects(speed: 1, pitch: 1000, distortion: 0, reverb: 0, volume: 1),
         ///Slow
-        Effects(speed: 0.5, pitch: -2000, distortion: 0, reverb: 0, volume: 1),
+        Effects(speed: 0.5, pitch: -500, distortion: 0, reverb: 0, volume: 1),
         ///Megaphone
-        Effects(speed: 1, pitch: 0, distortion: 50, reverb: 0, volume: 1, distortionPreset: .multiDecimated2, reverbPreset: nil),
-        ///Chimpchunk
+        Effects(speed: 1, pitch: 0, distortion: 50, reverb: 0, volume: 10, distortionPreset: .multiDecimated2, reverbPreset: nil),
+        ///chipmunk
         Effects(speed: 1.2, pitch: 1300, distortion: 0, reverb: 0, volume: 1),
         ///Huge echo
         Effects(speed: 1, pitch: 0, distortion: 0, reverb: 60, volume: 1)

@@ -103,7 +103,7 @@ class ListViewController: UIViewController {
             if searchBarText.isEmpty{
                 return voiceSoundCellModels
             }
-            return voiceSoundCellModels.filter({$0.name?.contains(searchBarText) == true})
+            return voiceSoundCellModels.filter({$0.name?.lowercased().contains(searchBarText.lowercased()) == true})
         }
     }
     
@@ -218,6 +218,11 @@ class ListViewController: UIViewController {
                                 }
                                 try? FileManager.default.removeItem(at: url)
                             }
+                            
+                            if let popover = activity.popoverPresentationController, let cellIndex = self.displayedVoiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: cellIndex, section: 0)){
+                                popover.sourceView = cell
+                                popover.sourceRect = cell.bounds
+                            }
                             loadingViewController.present(activity, animated: true, completion: nil)
                         }
                     })
@@ -268,7 +273,10 @@ class ListViewController: UIViewController {
         }))
         
         options.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
+        if let popover = options.popoverPresentationController, let cellIndex = self.displayedVoiceSoundCellModels.firstIndex(where: {$0.voiceSound === voiceSound}), let cell = self.collectionView.cellForItem(at: IndexPath(row: cellIndex, section: 0)){
+            popover.sourceView = cell
+            popover.sourceRect = cell.bounds
+        }
         
         self.navigationController?.present(options, animated: true, completion: nil)
     }

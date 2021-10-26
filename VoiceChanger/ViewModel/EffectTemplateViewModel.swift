@@ -13,6 +13,7 @@ class EffectTemplateViewModel{
         case empty
         case template
     }
+    
     ///Effect associated with template
     var effects: Effects?
     
