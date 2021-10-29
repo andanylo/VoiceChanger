@@ -13,7 +13,10 @@ class AudioFile: AVAudioFile{
     ///Returns a frame count of an audio file
     var frameCount: AVAudioFrameCount{
         get{
-            return AVAudioFrameCount(self.length)
+            guard let bufferLength = self.buffer?.frameLength else{
+                return AVAudioFrameCount(self.length)
+            }
+            return AVAudioFrameCount(bufferLength)
         }
     }
 
@@ -27,7 +30,7 @@ class AudioFile: AVAudioFile{
     
     ///Creates a pcm buffer
     lazy var buffer: AVAudioPCMBuffer? = {
-        guard let newBuffer = AVAudioPCMBuffer(pcmFormat: self.processingFormat, frameCapacity: frameCount) else{
+        guard let newBuffer = AVAudioPCMBuffer(pcmFormat: self.processingFormat, frameCapacity: AVAudioFrameCount(self.length)) else{
             return nil
         }
         try? self.read(into: newBuffer)
@@ -37,7 +40,11 @@ class AudioFile: AVAudioFile{
     ///Returns the duration of the file in seconds
     var duration: Double{
         get{
-            return Double(Double(frameCount) / self.processingFormat.sampleRate)
+            guard let buffer = buffer else {
+                return Double(Double(self.length) / self.processingFormat.sampleRate)
+            }
+            return Double(Double(frameCount) / buffer.format.sampleRate)
+            
         }
     }
     

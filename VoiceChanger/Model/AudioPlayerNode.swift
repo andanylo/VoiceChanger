@@ -43,8 +43,9 @@ class AudioPlayerNode: AVAudioPlayerNode{
         }
         self.startSeconds = startComponents.returnSeconds()
         let position = AVAudioFramePosition(self.startSeconds * self.outputFormat(forBus: 0).sampleRate)
+        
         self.scheduleSegment(file, startingFrame: position, frameCount: file.returnRemainingDuration(currentPosition: position), at: nil, completionHandler: nil)
-
+        
         super.play()
     }
     

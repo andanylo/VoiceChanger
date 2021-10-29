@@ -132,6 +132,9 @@ class ListViewController: UIViewController {
         self.navigationController?.navigationBar.sizeToFit()
 
         
+        let settingsItem = UIBarButtonItem(image: UIImage(named: "settings")?.withRenderingMode(.alwaysTemplate), style: .plain, target: self, action: #selector(settingsAction))
+        self.navigationItem.setLeftBarButton(settingsItem, animated: false)
+        
         voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0, listViewController: self)})
         
         
@@ -160,6 +163,12 @@ class ListViewController: UIViewController {
         
         collectionView.addGestureRecognizer(longPressGesture)
     }
+    
+    //MARK: - Settings action
+    @objc func settingsAction(){
+        
+    }
+    
     
     //MARK: - Layout the size of collection view cells
     override func viewDidLayoutSubviews() {
@@ -359,7 +368,7 @@ class ListViewController: UIViewController {
         navigationController?.navigationBar.tintColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
         view.backgroundColor = navigationController?.navigationBar.backgroundColor
         editButtonItem.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white
-        
+        navigationItem.leftBarButtonItems?.forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white})
         guard let cells = collectionView.visibleCells as? [VoiceSoundCell] else{
             return
         }

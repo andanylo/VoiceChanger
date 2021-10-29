@@ -24,7 +24,7 @@ class EffectPickerViewModel{
         }
     }
     
-    let imageNames: [String] = ["audio", "drunk", "brobot", "srobot", "fly", "alien", "canyon", "devil", "balloon", "snail", "megaphone", "chipmunk", "echo", "battery", "spiral", "fan"]
+    let imageNames: [String] = ["audio", "drunk", "brobot", "srobot", "fly", "alien", "canyon", "devil", "balloon", "snail", "megaphone", "chipmunk", "echo", "battery", "spiral", "fan", "",]
     
     var didPick: ((Effects) -> Void)?
     var didClickOnCreate: (() -> Void)?
@@ -45,11 +45,13 @@ class EffectPickerViewModel{
         //swirlEffect
         
         let swirlEffect = Effects(speed: 1, pitch: -800, distortion: 0, reverb: 0, volume: 1)
-        effectMakeRepeatTransitions(effect: swirlEffect, interval: 0.2, firstValue: -600, secondValue: 600, voiceSoundDuration: duration, effectPart: .pitch)
+        swirlEffect.effectTransitions = effectMakeRepeatTransitions(effect: swirlEffect, interval: 0.2, firstValue: -600, secondValue: 600, voiceSoundDuration: duration, effectPart: .pitch)
 
         //fan effect
         let fanEffect = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0, volume: 1)
-        effectMakeRepeatTransitions(effect: fanEffect, interval: 0.065, firstValue: 1, secondValue: 0, voiceSoundDuration: duration, effectPart: .volume)
+        fanEffect.effectTransitions = effectMakeRepeatTransitions(effect: fanEffect, interval: 0.065, firstValue: 1, secondValue: 0, voiceSoundDuration: duration, effectPart: .volume)
+        
+        
         
         [lowbatteryEffect, swirlEffect, fanEffect].forEach({effects.append($0)})
         
@@ -61,7 +63,7 @@ class EffectPickerViewModel{
        
     }
     
-    func effectMakeRepeatTransitions(effect: Effects, interval: Double, firstValue: Float, secondValue: Float, voiceSoundDuration: Double, effectPart: EffectPart){
+    func effectMakeRepeatTransitions(effect: Effects, interval: Double, firstValue: Float, secondValue: Float, voiceSoundDuration: Double, effectPart: EffectPart) -> [EffectTransition]{
         let effectCount = Int(voiceSoundDuration / interval)
         var effectTransitions: [EffectTransition] = []
         for count in 0..<effectCount{
@@ -69,7 +71,7 @@ class EffectPickerViewModel{
             
             effectTransitions.append(transition)
         }
-        effect.effectTransitions = effectTransitions
+        return effectTransitions
     }
     
     var effects = [
@@ -78,9 +80,9 @@ class EffectPickerViewModel{
         ///Drunk
         Effects(speed: 0.6, pitch: -100, distortion: 0, reverb: 0, volume: 1),
         ///Robot
-        Effects(speed: 1, pitch: 0, distortion: 10, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        Effects(speed: 1, pitch: -200, distortion: 25, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         ///small robot
-        Effects(speed: 1, pitch: 400, distortion: 10, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        Effects(speed: 1, pitch: 400, distortion: 25, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         //Bee
         Effects(speed: 1.5, pitch: 1000, distortion: 5, reverb: 0, volume: 1, distortionPreset: .speechWaves, reverbPreset: nil),
         ///alien
@@ -92,13 +94,14 @@ class EffectPickerViewModel{
         ///helium
         Effects(speed: 1, pitch: 1000, distortion: 0, reverb: 0, volume: 1),
         ///Slow
-        Effects(speed: 0.5, pitch: -500, distortion: 0, reverb: 0, volume: 1),
+        Effects(speed: 0.5, pitch: -100, distortion: 0, reverb: 0, volume: 1),
         ///Megaphone
         Effects(speed: 1, pitch: 0, distortion: 50, reverb: 0, volume: 10, distortionPreset: .multiDecimated2, reverbPreset: nil),
         ///chipmunk
         Effects(speed: 1.2, pitch: 1300, distortion: 0, reverb: 0, volume: 1),
         ///Huge echo
-        Effects(speed: 1, pitch: 0, distortion: 0, reverb: 60, volume: 1)
+        Effects(speed: 1, pitch: 0, distortion: 0, reverb: 60, volume: 1),
+        
     ]
     
     
