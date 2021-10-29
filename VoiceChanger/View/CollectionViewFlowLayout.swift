@@ -12,16 +12,17 @@ class CollectionViewFlowLayout: UICollectionViewFlowLayout{
     var delegate: FlowLayoutDelegate?
     
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return self.attributes.isEmpty ? super.layoutAttributesForElements(in: rect) : self.attributes
+        return self.attributes.isEmpty ? super.layoutAttributesForElements(in: rect) : self.attributes.filter{ $0.frame.intersects(rect) }
     }
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
 
-        return self.attributes.isEmpty ? super.layoutAttributesForItem(at: indexPath) : self.attributes[indexPath.row]
+        return self.attributes.isEmpty ? super.layoutAttributesForItem(at: indexPath) : self.attributes.first(where: { $0.indexPath.item == indexPath.item })
     }
+
+    
     open override func layoutAttributesForInteractivelyMovingItem(at indexPath: IndexPath, withTargetPosition position: CGPoint) -> UICollectionViewLayoutAttributes {
         let attributes = super.layoutAttributesForInteractivelyMovingItem(at: indexPath, withTargetPosition: position)
         attributes.alpha = 0.75
-        
         return attributes
     }
     
@@ -32,9 +33,11 @@ class CollectionViewFlowLayout: UICollectionViewFlowLayout{
         guard let collectionView = collectionView else{
             return
         }
+        
+        
         attributes = []
         let numberOfItemsInLine = self.delegate?.numberOfItemsInLine() ?? 3
-        
+    
         for item in 0..<collectionView.numberOfItems(inSection: 0){
             
             let indexPath = IndexPath(row: item, section: 0)
@@ -44,8 +47,8 @@ class CollectionViewFlowLayout: UICollectionViewFlowLayout{
             let bottomEdgeForYPrevious =  edgesForItem(collectionView: collectionView, forAnItemAtRow: item - numberOfItemsInLine).bottom
             
             //Get position for current attributes
-            let positionX = item % numberOfItemsInLine == 0 ? edgesForCurrentItem.left : attributes[item - 1].frame.maxX + edgesForCurrentItem.left
-            let positionY = item < numberOfItemsInLine ? edgesForCurrentItem.top : attributes[item - numberOfItemsInLine].frame.maxY + bottomEdgeForYPrevious + edgesForCurrentItem.top
+            let positionX = item % numberOfItemsInLine == 0 ? edgesForCurrentItem.left : attributes[item - 1].frame.maxX + edgesForCurrentItem.left + edgesForCurrentItem.right
+            let positionY = item < numberOfItemsInLine ? edgesForCurrentItem.top * 2 : attributes[item - numberOfItemsInLine].frame.maxY + bottomEdgeForYPrevious + edgesForCurrentItem.top
             
             
             
@@ -57,7 +60,7 @@ class CollectionViewFlowLayout: UICollectionViewFlowLayout{
         }
     }
     
-    func  edgesForItem(collectionView: UICollectionView, forAnItemAtRow: Int) -> UIEdgeInsets{
+    func edgesForItem(collectionView: UICollectionView, forAnItemAtRow: Int) -> UIEdgeInsets{
         return self.delegate?.collectionView(collectionView, layout: self, edgesForItemAt: IndexPath(row: max(0, forAnItemAtRow), section: 0)) ?? UIEdgeInsets.zero
     }
 }

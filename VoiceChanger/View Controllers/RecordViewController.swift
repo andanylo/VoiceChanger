@@ -56,7 +56,7 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
     override func viewWillDisappear(_ animated: Bool) {
         
         if startedRecording && !isRerecording{
-            if voiceSound.fileExists && !recorder.isRecording && isRerecording{
+            if voiceSound.fileExists && !recorder.isRecording{
                 delegate?.willSave(voiceSound: self.voiceSound)
             }
             if recorder.isRecording{
@@ -66,6 +66,9 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
                     try? voiceSound.removeSound()
                 }
             }
+        }
+        else{
+            isRerecording = false
         }
         
         

@@ -84,7 +84,7 @@ class EffectTemplateCell: UICollectionViewCell{
             imageView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
         }
         if let imageName = self.effectTemplateViewModel?.imageName{
-            imageView.image = UIImage(named: imageName)?.withAlignmentRectInsets(.init(top: -8, left: -8, bottom: -8, right: -8))
+            imageView.image = UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate).withAlignmentRectInsets(.init(top: -8, left: -8, bottom: -8, right: -8))
         }
         self.backgroundColor = .clear
         self.effectTemplateViewModel?.didSelect = { [weak self] bool in
@@ -107,6 +107,7 @@ class EffectTemplateCell: UICollectionViewCell{
         
         self.contentView.layer.borderColor = effectTemplateViewModel?.isSelected == true ? selectedColor.cgColor : standardColor.cgColor
         addImage?.tintColor = Variables.shared.currentDeviceTheme == .normal ? .gray : .white
+        imageView.tintColor = .black
     }
 }
 

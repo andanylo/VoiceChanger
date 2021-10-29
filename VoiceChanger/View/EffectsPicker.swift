@@ -53,10 +53,12 @@ class EffectsPicker: UIView{
         super.init(frame: CGRect.zero)
     }
     func setTheme(){
-        guard let cells = collectionView.visibleCells as? [EffectTemplateCell] else{
-            return
+
+        for i in 0..<self.effectPickerViewModel.effectsTemplateViewModels.count{
+            if let cell = collectionView.cellForItem(at: IndexPath(row: i, section: 0)) as? EffectTemplateCell{
+                cell.setTheme()
+            }
         }
-        cells.forEach({$0.setTheme()})
     }
     
     override func didMoveToSuperview() {

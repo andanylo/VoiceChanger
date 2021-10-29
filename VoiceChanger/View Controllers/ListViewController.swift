@@ -8,7 +8,7 @@
 import UIKit
 
 class ListViewController: UIViewController {
-    //MARK:- Table view
+    //MARK: - Table view
     private lazy var collectionView: UICollectionView = {
         let collectionViewLayout = CollectionViewFlowLayout()
         collectionViewLayout.delegate = self
@@ -29,7 +29,7 @@ class ListViewController: UIViewController {
     }()
     
     
-    //MARK:- Search controller
+    //MARK: - Search controller
     private lazy var searchController: UISearchController = {
         let searchControl = UISearchController(searchResultsController: nil)
         searchControl.searchResultsUpdater = self
@@ -40,7 +40,7 @@ class ListViewController: UIViewController {
         return searchControl
     }()
 
-    //MARK:- Record button
+    //MARK: - Record button
     private lazy var recordButton: UIButton = {
         let button = UIButton(frame: CGRect.zero)
         button.frame.size = CGSize(width: 50, height: 50)
@@ -61,7 +61,7 @@ class ListViewController: UIViewController {
         return button
     }()
     
-    //MARK:- Set editing method
+    //MARK: - Set editing method
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         changeSelected(voiceSoundCellModel: nil)
@@ -161,7 +161,7 @@ class ListViewController: UIViewController {
         collectionView.addGestureRecognizer(longPressGesture)
     }
     
-    //MARK:- Layout the size of collection view cells
+    //MARK: - Layout the size of collection view cells
     override func viewDidLayoutSubviews() {
         guard let collectionViewFlowLayout = collectionView.collectionViewLayout as? CollectionViewFlowLayout else{
             return
@@ -193,7 +193,7 @@ class ListViewController: UIViewController {
         presentPopUp(type: .record, objectToTransfer: objectToTransfer)
     }
     
-    //MARK:- Options for the voice sound
+    //MARK: - Options for the voice sound
     func presentOptions(voiceSound: VoiceSound){
         let options = UIAlertController(title: voiceSound.name, message: nil, preferredStyle: .actionSheet)
         options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
@@ -281,7 +281,7 @@ class ListViewController: UIViewController {
         self.navigationController?.present(options, animated: true, completion: nil)
     }
     
-    //MARK:- collection view rearrangement
+    //MARK: - collection view rearrangement
     func startMovement(){
         guard let indexPath = collectionView.indexPathForItem(at: longPressGesture.location(in: longPressGesture.view)), self.isEditing else{
             return
@@ -292,6 +292,7 @@ class ListViewController: UIViewController {
     }
     func updateMovement(){
         if movableIndexPath != nil{
+          
             collectionView.updateInteractiveMovementTargetPosition(longPressGesture.location(in: longPressGesture.view))
         }
     }
@@ -310,6 +311,7 @@ class ListViewController: UIViewController {
         moveModel(from: sourceIndexPath.row, to: destinationIndexPath.row)
     }
     func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveFromItemAt originalIndexPath: IndexPath, toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
+        
         return proposedIndexPath
     }
   
@@ -335,7 +337,7 @@ class ListViewController: UIViewController {
         setTheme()
     }
     
-    //MARK: Set theme for views
+    //MARK: -Set theme for views
     func setTheme(){
         if #available(iOS 13.0, *) {
             
@@ -372,7 +374,7 @@ class ListViewController: UIViewController {
     
 }
 
-//MARK: Delegate for the search controller
+//MARK: -Delegate for the search controller
 extension ListViewController: UISearchResultsUpdating{
     func updateSearchResults(for searchController: UISearchController) {
         DispatchQueue.main.async {
@@ -383,7 +385,7 @@ extension ListViewController: UISearchResultsUpdating{
     
 }
 
-//MARK: Collection view delegate and datasource
+//MARK: -Collection view delegate and datasource
 extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, FlowLayoutDelegate{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return displayedVoiceSoundCellModels.count

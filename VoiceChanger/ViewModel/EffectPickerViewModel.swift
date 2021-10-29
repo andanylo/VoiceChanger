@@ -24,7 +24,7 @@ class EffectPickerViewModel{
         }
     }
     
-    let imageNames: [String] = ["audio", "drunk", "robot", "smallRobot", "", "alien", "", "devil", "balloon", "snail", "", "", "", "", "", "",]
+    let imageNames: [String] = ["audio", "drunk", "brobot", "srobot", "fly", "alien", "canyon", "devil", "balloon", "snail", "megaphone", "chipmunk", "echo", "battery", "spiral", "fan"]
     
     var didPick: ((Effects) -> Void)?
     var didClickOnCreate: (() -> Void)?
@@ -78,7 +78,7 @@ class EffectPickerViewModel{
         ///Drunk
         Effects(speed: 0.6, pitch: -100, distortion: 0, reverb: 0, volume: 1),
         ///Robot
-        Effects(speed: 1, pitch: -400, distortion: 10, reverb: 0, volume: 1),
+        Effects(speed: 1, pitch: 0, distortion: 10, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         ///small robot
         Effects(speed: 1, pitch: 400, distortion: 10, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         //Bee

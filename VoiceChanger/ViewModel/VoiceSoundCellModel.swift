@@ -61,7 +61,7 @@ class VoiceSoundCellModel{
     }
     
     ///Area for cell
-    var edges = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    var edges = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
     
     ///Is currently selected
     var isSelected: Bool = false{
