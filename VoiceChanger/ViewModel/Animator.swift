@@ -46,7 +46,7 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
         var completion: (() -> Void)?
         var withSpring = false
         ///PopUpController animation
-        if firstController is ListViewController, let popUpViewController = secondController as? PopUpController{
+        if let popUpViewController = secondController as? PopUpController{
 
             let recordView = UIView()
             recordView.layer.cornerRadius = popUpViewController.mainView.layer.cornerRadius
@@ -79,7 +79,7 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
             withSpring = true
         }
         ///LoadingViewController animation
-        else if firstController is ListViewController, let loadingViewController = secondController as? LoadingViewController{
+        else if let loadingViewController = secondController as? LoadingViewController{
             
             let loadView = LoadingView(frame: loadingViewController.loadingView.frame)
             loadView.translatesAutoresizingMaskIntoConstraints = true

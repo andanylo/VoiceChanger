@@ -190,7 +190,7 @@ extension Player: CustomTimerDelegate{
     func timerBlock(timer: CustomTimer) {
         
         if self.audioNodes.audioEngine.isRunning {
-            let currentTime = timer.timeComponents.returnSeconds()//self.audioNodes.audioPlayer.currentTime
+            let currentTime = self.audioNodes.audioPlayer.currentTime
             
             if currentTime != self.previousValue && currentTime >= 0{
                 if currentTime > self.currentVoiceSound?.duration.returnSeconds() ?? 0.0{

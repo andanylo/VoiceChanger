@@ -132,8 +132,8 @@ class ListViewController: UIViewController {
         self.navigationController?.navigationBar.sizeToFit()
 
         
-        let settingsItem = UIBarButtonItem(image: UIImage(named: "settings")?.withRenderingMode(.alwaysTemplate), style: .plain, target: self, action: #selector(settingsAction))
-        self.navigationItem.setLeftBarButton(settingsItem, animated: false)
+        let shoppingItem = UIBarButtonItem(image: UIImage(named: "shopping-bag")?.withRenderingMode(.alwaysTemplate), style: .plain, target: self, action: #selector(removeAdsAction))
+        self.navigationItem.setLeftBarButton(shoppingItem, animated: false)
         
         voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0, listViewController: self)})
         
@@ -165,8 +165,8 @@ class ListViewController: UIViewController {
     }
     
     //MARK: - Settings action
-    @objc func settingsAction(){
-        
+    @objc func removeAdsAction(){
+        presentPopUp(type: .ads, objectToTransfer: nil)
     }
     
     
@@ -185,7 +185,7 @@ class ListViewController: UIViewController {
         let popUpController = PopUpController(rootViewController: self)
         popUpController.popUpCategory = type
         popUpController.objectToTransfer = objectToTransfer
-        popUpController.modalPresentationStyle = .overCurrentContext
+        popUpController.modalPresentationStyle = .custom
         Animator.shared.duration = 0.72
         popUpController.transitioningDelegate = self
         self.navigationController?.present(popUpController, animated: true, completion: nil)
@@ -208,7 +208,7 @@ class ListViewController: UIViewController {
         options.addAction(UIAlertAction(title: "Share sound", style: .default, handler: { (_) in
             
             let loadingViewController = LoadingViewController()
-            loadingViewController.modalPresentationStyle = .overCurrentContext
+            loadingViewController.modalPresentationStyle = .custom
             loadingViewController.transitioningDelegate = self
             Animator.shared.duration = 0.4
             self.navigationController?.present(loadingViewController, animated: true, completion: nil)
@@ -219,12 +219,7 @@ class ListViewController: UIViewController {
                         DispatchQueue.main.async {
                             let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
                             activity.completionWithItemsHandler = { _, completed, _, _ in
-                                DispatchQueue.main.async{
-                                    loadingViewController.loadingViewModel.state = completed ? .loadedSuccessfully : .error
-                                    Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { _ in
-                                        loadingViewController.dismiss(animated: true, completion: nil)
-                                    }
-                                }
+                                loadingViewController.dismissWith(state: completed ? .loadedSuccessfully : .error)
                                 try? FileManager.default.removeItem(at: url)
                             }
                             

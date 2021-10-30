@@ -31,6 +31,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
     enum PopUpCategory{
         case record
         case effect
+        case ads
     }
     
     var popUpCategory: PopUpCategory!
@@ -40,7 +41,19 @@ class PopUpController: UIViewController, KeyboardDelegate{
     
     var prefferedHeight: CGFloat{
         get{
-            return (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0.0) + (popUpCategory == .record ? 336.5 : 400)
+            var height: CGFloat = 0.0
+            switch popUpCategory {
+            case .record:
+                height = 336.5
+            case .effect:
+                height = 400
+            case .ads:
+                height = 200
+            case .none:
+                break
+            }
+            
+            return (UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0.0) + height
         }
     }
     
@@ -120,11 +133,15 @@ class PopUpController: UIViewController, KeyboardDelegate{
         else if popUpCategory == .effect{
             containerViewController = EffectCreatorController()
         }
+        else if popUpCategory == .ads{
+            containerViewController = AdsRemoverController()
+        }
         guard let containerViewController = containerViewController else{
             return
         }
         containerView.addSubview(containerViewController.view)
         
+        containerViewController.view.translatesAutoresizingMaskIntoConstraints = false
         containerViewController.view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor).isActive = true
         containerViewController.view.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
         containerViewController.view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true

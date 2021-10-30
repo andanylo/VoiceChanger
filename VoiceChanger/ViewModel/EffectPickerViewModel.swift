@@ -37,7 +37,7 @@ class EffectPickerViewModel{
         
         //low battery
         let lowbatteryEffect = Effects(speed: 1, pitch: 0, distortion: 0, reverb: 0, volume: 1)
-        lowbatteryEffect.effectTransitions = [EffectTransition(effects: lowbatteryEffect, startPoint: .custom(1/2), endPoint: .custom(1), fromValue: lowbatteryEffect.standardValues.speed, transitionValue: 0.2, effectPartToTransition: .speed),
+        lowbatteryEffect.effectTransitions = [EffectTransition(effects: lowbatteryEffect, startPoint: .custom(1/2), endPoint: .custom(1), fromValue: lowbatteryEffect.standardValues.speed, transitionValue: 0.05, effectPartToTransition: .speed),
                                               EffectTransition(effects: lowbatteryEffect, startPoint: .custom(1/2), endPoint: .custom(1), fromValue: 0, transitionValue: -500, effectPartToTransition: .pitch)
         ]
         

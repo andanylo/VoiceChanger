@@ -50,5 +50,12 @@ class LoadingViewController: UIViewController{
         
     }
 
-    
+    func dismissWith(state: LoadingViewModel.LoadingState){
+        DispatchQueue.main.async{
+            self.loadingViewModel.state = state
+            Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { _ in
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
 }
