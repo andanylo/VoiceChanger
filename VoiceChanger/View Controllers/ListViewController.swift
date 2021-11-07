@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import GoogleMobileAds
 class ListViewController: UIViewController {
     //MARK: - Table view
     private lazy var collectionView: UICollectionView = {
@@ -128,12 +128,12 @@ class ListViewController: UIViewController {
         self.navigationItem.largeTitleDisplayMode = .always
         self.navigationItem.searchController = searchController
         
-        self.navigationItem.setRightBarButton(editButtonItem, animated: false)
+        self.navigationItem.setLeftBarButton(editButtonItem, animated: false)
         self.navigationController?.navigationBar.sizeToFit()
 
         
         let shoppingItem = UIBarButtonItem(image: UIImage(named: "shopping-bag")?.withRenderingMode(.alwaysTemplate), style: .plain, target: self, action: #selector(removeAdsAction))
-        self.navigationItem.setLeftBarButton(shoppingItem, animated: false)
+        self.navigationItem.setRightBarButton(shoppingItem, animated: false)
         
         voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0, listViewController: self)})
         
@@ -162,6 +162,12 @@ class ListViewController: UIViewController {
         setTheme()
         
         collectionView.addGestureRecognizer(longPressGesture)
+        
+        
+        if !Variables.shared.removedAds{
+            Ads.shared.loadAd(fullScreenContentDelegate: self)
+            
+        }
     }
     
     //MARK: - Settings action
@@ -364,6 +370,7 @@ class ListViewController: UIViewController {
         view.backgroundColor = navigationController?.navigationBar.backgroundColor
         editButtonItem.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white
         navigationItem.leftBarButtonItems?.forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white})
+        navigationItem.rightBarButtonItems?.forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white})
         guard let cells = collectionView.visibleCells as? [VoiceSoundCell] else{
             return
         }
@@ -502,6 +509,15 @@ extension ListViewController: RecordViewControllerDelegate{
             }
         }
     }
+    func didSave() {
+        DispatchQueue.main.async {
+            Ads.shared.showNum += 1
+            if Ads.shared.showNum == Ads.shared.numToShowAd{
+                Ads.shared.interstital?.present(fromRootViewController: self)
+            }
+        }
+        
+    }
 }
 
 extension ListViewController: PlayerDelegate{
@@ -537,3 +553,6 @@ extension ListViewController: PlayerDelegate{
 }
 
 
+extension ListViewController: GADFullScreenContentDelegate{
+    
+}

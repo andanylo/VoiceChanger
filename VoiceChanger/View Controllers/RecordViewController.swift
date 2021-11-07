@@ -87,7 +87,7 @@ extension RecordViewController: RecorderDelegate{
     func didStopRecording() {
         DispatchQueue.main.async{
             (self.view as? RecorderView)?.changeStateOfRecordButton(isPlaying: false)
-            self.parent?.dismiss(animated: true, completion: nil)
+            self.parent?.dismiss(animated: true, completion: {delegate?.didSave()})
         }
     }
 }
@@ -118,4 +118,5 @@ extension RecordViewController: CustomTimerDelegate{
 
 protocol RecordViewControllerDelegate: AnyObject{
     func willSave(voiceSound: VoiceSound)
+    func didSave()
 }

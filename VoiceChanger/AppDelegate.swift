@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import GoogleMobileAds
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +20,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         catch{
             
+        }
+        if UserDefaults.standard.bool(forKey: "RemoveAds") != true{
+            UserDefaults.standard.set(false, forKey: "RemoveAds")
+            GADMobileAds.sharedInstance().start(completionHandler: nil)
         }
         return true
     }

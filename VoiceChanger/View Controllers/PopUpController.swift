@@ -48,7 +48,7 @@ class PopUpController: UIViewController, KeyboardDelegate{
             case .effect:
                 height = 400
             case .ads:
-                height = 200
+                height = 230
             case .none:
                 break
             }

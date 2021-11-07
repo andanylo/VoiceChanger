@@ -12,4 +12,10 @@ class Variables{
     var recordList: RecordList = RecordList()
     
     var currentDeviceTheme: DeviceTheme = .normal
+    
+    var removedAds: Bool{
+        get{
+            return UserDefaults.standard.bool(forKey: "RemoveAds")
+        }
+    }
 }
