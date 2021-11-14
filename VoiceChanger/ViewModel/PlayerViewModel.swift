@@ -44,6 +44,7 @@ class PlayerViewModel{
     
     ///Method that gets called on skip button click
     func didClickOnSkipButton(typeOfSkipButton: PlayerView.SkipButtonType){
+        let wasPlaying = Player.shared.currentVoiceSound?.playerState.isPlaying
         if Player.shared.currentVoiceSound?.playerState.isPlaying == true{
             Player.shared.stopPlaying(isPausing: true)
         }
@@ -53,6 +54,10 @@ class PlayerViewModel{
         }
         else{
             updateSliderComponents(seconds: max(sliderSeconds - 5, 0))
+        }
+        
+        if let voiceSound = voiceSound, wasPlaying == true{
+            try? Player.shared.playFile(voiceSound: voiceSound, at: sliderComponents)
         }
     }
     
@@ -66,6 +71,14 @@ class PlayerViewModel{
         if isPlaying == true{
             Player.shared.stopPlaying(isPausing: true)
         }
+    }
+    
+    ///Method that gets called after touch was removed from slider
+    func didRemoveTouchFromSlider(){
+        guard let voiceSound = voiceSound else{
+            return
+        }
+        try? Player.shared.playFile(voiceSound: voiceSound, at: sliderComponents)
     }
     
     ///Returns the slider value converted from TimeComponents

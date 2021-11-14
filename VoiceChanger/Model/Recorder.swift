@@ -34,7 +34,7 @@ class Recorder{
     
     
     ///Standard settings for recording files
-    static let settings = [AVFormatIDKey: Int(kAudioFormatAppleLossless), AVSampleRateKey: 12000, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
+    static let settings = [AVFormatIDKey: Int(kAudioFormatAppleLossless), AVSampleRateKey: 1, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
     
     private var audioRecorder: AVAudioRecorder!
     

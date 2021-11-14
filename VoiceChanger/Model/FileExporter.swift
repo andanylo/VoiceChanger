@@ -65,6 +65,8 @@ class FileExporter{
         self.exportAudioNodes.audioPlayer.play()
         
         let exportURL = cacheURL.appendingPathComponent(voiceSound.name + ".m4a")
+        
+        
         let newAudioFile = try AVAudioFile(forWriting: exportURL, settings: file.fileFormat.settings)
        
         //Buffer from manual renderer
@@ -97,10 +99,36 @@ class FileExporter{
                 break
             }
         }
+        
+    
+        
         completion(exportURL)
         voiceSound.effects.resetEffects()
         exportAudioNodes.audioPlayer.stop()
         exportAudioNodes.audioEngine.disableManualRenderingMode()
         exportAudioNodes.audioEngine.stop()
+        
+        
+//        let asset = AVAsset(url: exportURL)
+//        let exporter = (AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetMediumQuality))!
+//
+//        let newURL = cacheURL.appendingPathComponent(voiceSound.name + ".mp3")
+//        exporter.outputURL = newURL
+//        exporter.outputFileType = .mp3
+//
+//        exporter.exportAsynchronously {
+//            switch exporter.status{
+//            case .completed:
+//                try? FileManager.default.removeItem(at: exportURL)
+//                completion(newURL)
+//            case .cancelled:
+//                try? FileManager.default.removeItem(at: exportURL)
+//            case .failed:
+//                try? FileManager.default.removeItem(at: exportURL)
+//            default:
+//                break
+//            }
+//        }
+        
     }
 }

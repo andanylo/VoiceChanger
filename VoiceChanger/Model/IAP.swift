@@ -107,13 +107,15 @@ extension IAP: SKProductsRequestDelegate, SKPaymentTransactionObserver{
         }
     }
     
-    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
-        delegate?.finish(state: .restored)
-    }
     func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         delegate?.finish(state: .failed)
     }
     
+    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
+        if !Variables.shared.removedAds{
+            delegate?.finish(state: .failed)
+        }
+    }
     // IAP PAYMENT QUEUE
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction:AnyObject in transactions {
@@ -135,7 +137,7 @@ extension IAP: SKProductsRequestDelegate, SKPaymentTransactionObserver{
                     UserDefaults.standard.set(true, forKey: "RemoveAds")
                     delegate?.finish(state: .restored)
                     break
-                    
+                
                 default: break
                 }}}
     }

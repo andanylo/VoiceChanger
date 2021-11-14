@@ -20,7 +20,11 @@ class ListViewController: UIViewController {
         view.delegate = self
         view.alwaysBounceVertical = true
         view.allowsMultipleSelection = false
-        view.allowsSelectionDuringEditing = false
+        if #available(iOS 14.0, *) {
+            view.allowsSelectionDuringEditing = false
+        } else {
+            // Fallback on earlier versions
+        }
         view.backgroundColor = UIColor.lightGray
         view.backgroundColor = UIColor(red: 242 / 255, green: 242 / 255, blue: 247 / 255, alpha: 1)
         view.showsHorizontalScrollIndicator = false
@@ -166,7 +170,6 @@ class ListViewController: UIViewController {
         
         if !Variables.shared.removedAds{
             Ads.shared.loadAd(fullScreenContentDelegate: self)
-            
         }
     }
     
@@ -225,7 +228,11 @@ class ListViewController: UIViewController {
                         DispatchQueue.main.async {
                             let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
                             activity.completionWithItemsHandler = { _, completed, _, _ in
-                                loadingViewController.dismissWith(state: completed ? .loadedSuccessfully : .error)
+                                DispatchQueue.main.async {
+                                    activity.dismiss(animated: true, completion: nil)
+                                    loadingViewController.dismissWith(state: completed ? .loadedSuccessfully : .error)
+                                }
+                                
                                 try? FileManager.default.removeItem(at: url)
                             }
                             
@@ -510,13 +517,15 @@ extension ListViewController: RecordViewControllerDelegate{
         }
     }
     func didSave() {
-        DispatchQueue.main.async {
-            Ads.shared.showNum += 1
-            if Ads.shared.showNum == Ads.shared.numToShowAd{
-                Ads.shared.interstital?.present(fromRootViewController: self)
+        if !Variables.shared.removedAds {
+            DispatchQueue.main.async {
+                Ads.shared.showNum += 1
+                if Ads.shared.showNum >= Ads.shared.numToShowAd{
+                    Ads.shared.showNum = 0
+                    Ads.shared.interstital?.present(fromRootViewController: self)
+                }
             }
         }
-        
     }
 }
 

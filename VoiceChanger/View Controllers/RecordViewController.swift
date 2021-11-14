@@ -74,6 +74,7 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
         
     }
     
+    
 }
 
 extension RecordViewController: RecorderDelegate{
@@ -87,7 +88,7 @@ extension RecordViewController: RecorderDelegate{
     func didStopRecording() {
         DispatchQueue.main.async{
             (self.view as? RecorderView)?.changeStateOfRecordButton(isPlaying: false)
-            self.parent?.dismiss(animated: true, completion: {delegate?.didSave()})
+            self.parent?.dismiss(animated: true, completion: {[weak self] in self?.delegate?.didSave()})
         }
     }
 }

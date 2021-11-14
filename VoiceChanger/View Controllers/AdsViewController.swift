@@ -13,9 +13,9 @@ import StoreKit
 class AdsRemoverController: UIViewController, PopUpChildProtocol{
     func setTheme() {
         titleLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .black : .white
-        priceLabel.textColor = .darkGray
+        priceLabel.textColor = Variables.shared.currentDeviceTheme == .normal ? .darkGray : .lightGray
         buyButton.backgroundColor = Variables.shared.currentDeviceTheme == .normal ? .init(white: 0.8, alpha: 1) : .init(white: 0.2, alpha: 1)
-        restoreButton.setTitleColor(Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white, for: .normal)
+        restoreButton.setTitleColor(Variables.shared.currentDeviceTheme == .normal ? .black : .white, for: .normal)
     }
     
     var priceLabelViewModel: PriceLabelViewModel = PriceLabelViewModel()
@@ -54,7 +54,7 @@ class AdsRemoverController: UIViewController, PopUpChildProtocol{
         let label = UILabel()
         label.text = "$?.??"
         label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 30, weight: .regular)
+        label.font = UIFont.systemFont(ofSize: 24, weight: .regular)
         label.sizeToFit()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.widthAnchor.constraint(greaterThanOrEqualToConstant: label.frame.width).isActive = true
@@ -67,7 +67,7 @@ class AdsRemoverController: UIViewController, PopUpChildProtocol{
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitleColor(.init(red: 0, green: 122/255, blue: 1, alpha: 1), for: .normal)
-        button.setTitle("Already purchased? Click to restore", for: .normal)
+        button.setTitle("Restore purchase", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .light)
         button.addTarget(self, action: #selector(restoreButtonClicked), for: .touchUpInside)
         button.sizeToFit()
@@ -94,7 +94,7 @@ class AdsRemoverController: UIViewController, PopUpChildProtocol{
         IAP.shared.delegate = self
         
         self.view.addSubview(restoreButton)
-        restoreButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -15).isActive = true
+        restoreButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -15).isActive = true
         restoreButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         
         self.view.addSubview(buyButton)
@@ -109,7 +109,7 @@ class AdsRemoverController: UIViewController, PopUpChildProtocol{
         
         self.view.addSubview(priceLabel)
         priceLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        priceLabel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+        priceLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 15).isActive = true
     }
     
     //MARK: - Buy button clicked

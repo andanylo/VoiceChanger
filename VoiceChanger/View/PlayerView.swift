@@ -25,6 +25,7 @@ class PlayerView: UIView{
         slider.setThumbImage(getThumbImage(), for: .normal)
         
         slider.addTarget(self, action: #selector(didChangeValue(sender:)), for: .valueChanged)
+        slider.addTarget(self, action: #selector(didRemoveTap), for: .touchUpInside)
         return slider
     }()
     
@@ -118,14 +119,28 @@ class PlayerView: UIView{
     
     private var previousValue: Float = 0.0
 
+    private var wasPlaying: Bool? = nil
     
     ///did change value of player slider
     @objc func didChangeValue(sender: UISlider){
+        
         if sender.value != previousValue{
+            if wasPlaying == nil{
+                wasPlaying = Player.shared.currentVoiceSound?.playerState.isPlaying
+            }
+            
             self.playerViewModel.didChangeTheValueOfSlider(value: sender.value)
             self.previousValue = sender.value
         }
     }
+    ///Touch was removed from slider
+    @objc func didRemoveTap(){
+        if wasPlaying == true{
+            self.playerViewModel.didRemoveTouchFromSlider()
+        }
+        wasPlaying = nil
+    }
+    
     
     ///Setups the player view
     private func setUp(playerViewModel: PlayerViewModel){
