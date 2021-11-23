@@ -34,7 +34,11 @@ class Recorder{
     
     
     ///Standard settings for recording files
-    static let settings = [AVFormatIDKey: Int(kAudioFormatAppleLossless), AVSampleRateKey: 1, AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue]
+    static let settings = [AVFormatIDKey: kAudioFormatMPEG4AAC,
+                AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue,
+                AVEncoderBitRateKey: 192000,
+                AVNumberOfChannelsKey: 1,
+                AVSampleRateKey: 44100.0] as [String : Any]
     
     private var audioRecorder: AVAudioRecorder!
     
@@ -89,7 +93,6 @@ class Recorder{
         
         do{
             try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default)
-            try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
             try AVAudioSession.sharedInstance().setActive(true)
         }
         catch{

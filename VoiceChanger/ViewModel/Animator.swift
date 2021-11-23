@@ -50,13 +50,14 @@ class Animator: NSObject, UIViewControllerAnimatedTransitioning{
 
             let recordView = UIView()
             recordView.layer.cornerRadius = popUpViewController.mainView.layer.cornerRadius
-            recordView.backgroundColor = popUpViewController.mainView.backgroundColor
+            recordView.backgroundColor = .clear
             
             let renderer = UIGraphicsImageRenderer(bounds: popUpViewController.mainView.bounds)
             let image = renderer.image { rendererContext in
                 popUpViewController.mainView.layer.render(in: rendererContext.cgContext)
             }
             let imageView = UIImageView(image: image)
+            imageView.backgroundColor = .clear
             recordView.addSubview(imageView)
             
             let starterRect = CGRect(x: popUpViewController.mainView.frame.origin.x, y: UIScreen.main.bounds.height, width: popUpViewController.mainView.frame.width, height: popUpViewController.mainView.frame.height)

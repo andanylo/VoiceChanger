@@ -80,9 +80,9 @@ class EffectPickerViewModel{
         ///Drunk
         Effects(speed: 0.6, pitch: -100, distortion: 0, reverb: 0, volume: 1),
         ///Robot
-        Effects(speed: 1, pitch: -200, distortion: 25, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        Effects(speed: 1, pitch: -200, distortion: 25, reverb: 1, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         ///small robot
-        Effects(speed: 1, pitch: 400, distortion: 25, reverb: 0, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
+        Effects(speed: 1, pitch: 400, distortion: 25, reverb: 1, volume: 1, distortionPreset: .multiEchoTight1, reverbPreset: nil),
         //Bee
         Effects(speed: 1.5, pitch: 1000, distortion: 5, reverb: 0, volume: 1, distortionPreset: .speechWaves, reverbPreset: nil),
         ///alien

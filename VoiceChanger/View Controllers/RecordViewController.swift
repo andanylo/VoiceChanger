@@ -13,7 +13,7 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
     var recorder = Recorder()
     lazy var voiceSound: VoiceSound = {
         let voiceSound = VoiceSound()
-        voiceSound.name = "Example"
+        voiceSound.name = "Sound \(Variables.shared.recordList.list.count + 1)"
         return voiceSound
     }()
     weak var delegate: RecordViewControllerDelegate?
@@ -24,8 +24,7 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
         }
     }
     
-    var isRerecording: Bool = false
-    var startedRecording: Bool = false
+    private var startedRecording: Bool = false
     
     ///Returns the recorder  view with audio wave and record button
     override func loadView() {
@@ -55,21 +54,18 @@ class RecordViewController: UIViewController, PopUpChildProtocol{
     ///View will disappear
     override func viewWillDisappear(_ animated: Bool) {
         
-        if startedRecording && !isRerecording{
-            if voiceSound.fileExists && !recorder.isRecording{
-                delegate?.willSave(voiceSound: self.voiceSound)
-            }
-            if recorder.isRecording{
-                let fileExists = voiceSound.fileExists
-                recorder.stopRecording()
-                if fileExists {
-                    try? voiceSound.removeSound()
-                }
+        
+        if voiceSound.fileExists && !recorder.isRecording && startedRecording{
+            delegate?.willSave(voiceSound: self.voiceSound)
+        }
+        if recorder.isRecording{
+            let fileExists = voiceSound.fileExists
+            recorder.stopRecording()
+            if fileExists {
+                try? voiceSound.removeSound()
             }
         }
-        else{
-            isRerecording = false
-        }
+        
         
         
     }

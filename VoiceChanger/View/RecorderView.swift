@@ -17,6 +17,7 @@ class RecorderView: UIView{
     lazy var nameField: UITextField = {
         let textField = UITextField()
         textField.font = UIFont(name: "Arial-BoldMT", size: 32)
+        textField.tintColor = .clear
         textField.borderStyle = .none
         textField.textAlignment = .center
         textField.delegate = self
@@ -81,28 +82,28 @@ class RecorderView: UIView{
         super.didMoveToSuperview()
         
         self.addSubview(nameField)
-        
+
         nameField.topAnchor.constraint(equalTo: self.topAnchor, constant: 55).isActive = true
         nameField.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 40).isActive = true
         nameField.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -40).isActive = true
-        
+
         self.addSubview(audioWave)
-        
+
         audioWave.topAnchor.constraint(equalTo: nameField.bottomAnchor, constant: 30).isActive = true
         audioWave.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 20).isActive = true
         audioWave.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -20).isActive = true
-        
+
         self.layoutIfNeeded()
         self.addSubview(timerLabel)
-        
+
         timerLabel.topAnchor.constraint(equalTo: audioWave.bottomAnchor, constant: 20).isActive = true
         timerLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        
+
         self.addSubview(recordButton)
-        
+
         recordButton.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 20).isActive = true
         recordButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        
+
         changeStateOfRecordButton(isPlaying: false)
     }
     
@@ -128,6 +129,10 @@ extension RecorderView: UITextFieldDelegate{
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         self.superview?.endEditing(true)
         return false
+    }
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        textField.tintColor = UIColor(red: 0, green: 122/255, blue: 1, alpha: 1)
+        return true
     }
 }
 

@@ -124,10 +124,6 @@ class PopUpController: UIViewController, KeyboardDelegate{
             
             if let voiceSound = objectToTransfer as? VoiceSound{
                 recordViewController.voiceSound = voiceSound
-                recordViewController.isRerecording = true
-            }
-            else{
-                recordViewController.isRerecording = false
             }
         }
         else if popUpCategory == .effect{

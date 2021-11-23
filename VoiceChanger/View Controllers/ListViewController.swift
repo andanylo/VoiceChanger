@@ -117,6 +117,9 @@ class ListViewController: UIViewController {
             searchController.isActive = true
             searchController.isActive = false
         }
+        if Variables.shared.removedAds{
+            self.navigationItem.rightBarButtonItems = []
+        }
     }
     
     
@@ -136,8 +139,11 @@ class ListViewController: UIViewController {
         self.navigationController?.navigationBar.sizeToFit()
 
         
-        let shoppingItem = UIBarButtonItem(image: UIImage(named: "shopping-bag")?.withRenderingMode(.alwaysTemplate), style: .plain, target: self, action: #selector(removeAdsAction))
-        self.navigationItem.setRightBarButton(shoppingItem, animated: false)
+        if !Variables.shared.removedAds{
+            let shoppingItem = UIBarButtonItem(image: UIImage(named: "shopping-bag")?.withRenderingMode(.alwaysTemplate), style: .plain, target: self, action: #selector(removeAdsAction))
+            self.navigationItem.setRightBarButton(shoppingItem, animated: false)
+        }
+        
         
         voiceSoundCellModels = Variables.shared.recordList.list.map({return VoiceSoundCellModel(voiceSound: $0, listViewController: self)})
         
@@ -274,7 +280,7 @@ class ListViewController: UIViewController {
                 self.navigationController?.present(renameAlert, animated: true, completion: nil)
             }
         }))
-        options.addAction(UIAlertAction(title: "Rerecord", style: .default, handler: { (_) in
+        options.addAction(UIAlertAction(title: "Re-record", style: .default, handler: { (_) in
             DispatchQueue.main.async {
                 self.presentRecorder(objectToTransfer: voiceSound)
             }
@@ -378,6 +384,7 @@ class ListViewController: UIViewController {
         editButtonItem.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white
         navigationItem.leftBarButtonItems?.forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white})
         navigationItem.rightBarButtonItems?.forEach({$0.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white})
+        searchController.searchBar.tintColor = Variables.shared.currentDeviceTheme == .normal ? .init(red: 0, green: 122/255, blue: 1, alpha: 1) : .white
         guard let cells = collectionView.visibleCells as? [VoiceSoundCell] else{
             return
         }

@@ -7,13 +7,14 @@
 
 import Foundation
 import AVFoundation
-
 class FileExporter{
     static var shared = FileExporter()
     
     lazy var exportAudioNodes: AudioNodes = {
        return AudioNodes(audioEngine: AudioEngine(), audioPlayer: AudioPlayerNode(), pitchAndSpeedNode: AVAudioUnitTimePitch(), distortionNode: AVAudioUnitDistortion(), reverbNode: AVAudioUnitReverb())
     }()
+    
+    
     
     //TODO:
     //Think about optimizing the frame count
@@ -72,7 +73,11 @@ class FileExporter{
         //Buffer from manual renderer
         let buffer: AVAudioPCMBuffer = AVAudioPCMBuffer(pcmFormat: exportAudioNodes.audioEngine.manualRenderingFormat, frameCapacity: exportAudioNodes.audioEngine.manualRenderingMaximumFrameCount)!
         
-        let fileLength = Int64(frameCount(file: file, effects: voiceSound.effects, processFrameCount: maxNumberOfFrames))
+        var fileLength = Int64(frameCount(file: file, effects: voiceSound.effects, processFrameCount: maxNumberOfFrames))
+        
+        if voiceSound.effects.currentValues.reverb > 0.0{
+            fileLength += 60000
+        }
         //Set transition change block
         if !voiceSound.effects.effectTransitions.isEmpty{
             voiceSound.effects.currentValues.applyTransitionChanges = { [weak self] effectPart in
@@ -80,8 +85,8 @@ class FileExporter{
                 self?.exportAudioNodes.applyTransitionChanges(effectTransitionPart: effectPart, effects: voiceSound.effects)
             }
         }
-        
         var renderCurrentFrame: Double = 0.0
+        
         while exportAudioNodes.audioEngine.manualRenderingSampleTime < fileLength{
             
             voiceSound.effects.effectTransitions.forEach({transition in
@@ -90,7 +95,7 @@ class FileExporter{
             renderCurrentFrame += Double(maxNumberOfFrames) * Double(voiceSound.effects.currentValues.speed)
             
             let status = try exportAudioNodes.audioEngine.renderOffline(buffer.frameCapacity, to: buffer)
-            
+           
             switch status{
             case .success:
                 try newAudioFile.write(from: buffer)
@@ -107,28 +112,5 @@ class FileExporter{
         exportAudioNodes.audioPlayer.stop()
         exportAudioNodes.audioEngine.disableManualRenderingMode()
         exportAudioNodes.audioEngine.stop()
-        
-        
-//        let asset = AVAsset(url: exportURL)
-//        let exporter = (AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetMediumQuality))!
-//
-//        let newURL = cacheURL.appendingPathComponent(voiceSound.name + ".mp3")
-//        exporter.outputURL = newURL
-//        exporter.outputFileType = .mp3
-//
-//        exporter.exportAsynchronously {
-//            switch exporter.status{
-//            case .completed:
-//                try? FileManager.default.removeItem(at: exportURL)
-//                completion(newURL)
-//            case .cancelled:
-//                try? FileManager.default.removeItem(at: exportURL)
-//            case .failed:
-//                try? FileManager.default.removeItem(at: exportURL)
-//            default:
-//                break
-//            }
-//        }
-        
     }
 }
